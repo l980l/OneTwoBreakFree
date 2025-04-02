@@ -18,14 +18,9 @@ class ONETWOBREAKFREE_API AOTBackroomsActor : public AActor
 public:	
 	AOTBackroomsActor();
 
-	virtual void BeginPlay() override;
-
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "PCG")
 	TObjectPtr<USplineComponent> PCGSpline;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="PCG")
 	TObjectPtr<UPCGComponent> PCGComponent;
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="PCG")
-	TObjectPtr<UPCGGraph> PCGGraph;
 };
