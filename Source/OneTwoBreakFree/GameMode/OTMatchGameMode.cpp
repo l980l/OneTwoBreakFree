@@ -251,7 +251,6 @@ bool AOTMatchGameMode::IsValidSpawnLocation(const FVector& Location, const TArra
     if (!World)
         return false;
 
-    // 다른 스폰 위치와의 최소 거리 확인
     for (const FVector& ExistingLocation : ExistingLocations)
     {
         float Distance = FVector::Dist2D(Location, ExistingLocation);
@@ -261,7 +260,6 @@ bool AOTMatchGameMode::IsValidSpawnLocation(const FVector& Location, const TArra
         }
     }
 
-    // 벽과의 충돌 검사 (구체 트레이스)
     FCollisionShape SphereShape = FCollisionShape::MakeSphere(MinDistanceFromWalls);
     FCollisionQueryParams QueryParams;
 
@@ -273,7 +271,6 @@ bool AOTMatchGameMode::IsValidSpawnLocation(const FVector& Location, const TArra
         QueryParams
     );
 
-    // 충돌이 없어야 유효한 위치
     return !bHasHit;
 }
 
@@ -282,7 +279,6 @@ void AOTMatchGameMode::TeleportPlayersToLocations(const TArray<FVector>& Locatio
     if (Locations.Num() == 0)
         return;
 
-    // 모든 플레이어 컨트롤러 가져오기
     TArray<APlayerController*> PlayerControllers;
     for (FConstPlayerControllerIterator Iterator = GetWorld()->GetPlayerControllerIterator(); Iterator; ++Iterator)
     {
@@ -293,7 +289,6 @@ void AOTMatchGameMode::TeleportPlayersToLocations(const TArray<FVector>& Locatio
         }
     }
 
-    // 각 플레이어를 스폰 위치로 텔레포트
     int32 LocationIndex = 0;
     for (APlayerController* PC : PlayerControllers)
     {
@@ -311,8 +306,7 @@ void AOTMatchGameMode::TeleportPlayersToLocations(const TArray<FVector>& Locatio
             // RestartPlayer 사용 - 이것이 레플리케이션을 올바르게 처리함
             RestartPlayerAtTransform(PC, FTransform(SpawnLocation));
 
-            UE_LOG(LogTemp, Log, TEXT("Teleported player %s to: (%f, %f, %f)"),
-                *PC->GetName(), SpawnLocation.X, SpawnLocation.Y, SpawnLocation.Z);
+            UE_LOG(LogTemp, Log, TEXT("Teleported player %s to: (%f, %f, %f)"), *PC->GetName(), SpawnLocation.X, SpawnLocation.Y, SpawnLocation.Z);
 
             LocationIndex++;
         }
