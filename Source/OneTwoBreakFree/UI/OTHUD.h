@@ -14,4 +14,22 @@ class ONETWOBREAKFREE_API AOTHUD : public AHUD
 {
 	GENERATED_BODY()
 	
+public:
+	virtual void DrawHUD() override;
+
+	UPROPERTY(EditAnywhere, Category = "Widgets")
+	TSubclassOf<class UOTCharacterOverlayWidget> CharacterOverlayClass;
+
+	UPROPERTY()
+	TObjectPtr<class UOTCharacterOverlayWidget> CharacterOverlay;
+
+	void AddCharacterOverlay();
+
+	UPROPERTY(EditAnywhere, Category = "Widgets")
+	TSubclassOf<class UOTAnnouncementWidget> AnnouncementClass;
+
+	UPROPERTY()
+	TObjectPtr<class UOTAnnouncementWidget> Announcement;
+
+	void AddAnnouncement();
 };

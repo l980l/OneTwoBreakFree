@@ -78,7 +78,7 @@ void AOTCharacterBase::Tick(float DeltaTime)
 		{
 			ConsumeStamina(DeltaTime);
 
-			if (Stamina <= 0.05f)
+			if (!CanSprint())
 			{
 				ServerToggleSprint(false);
 			}
@@ -94,7 +94,7 @@ void AOTCharacterBase::Tick(float DeltaTime)
 		if (AOTPlayerController* PC = Cast<AOTPlayerController>(Controller))
 		{
 			UE_LOG(LogTemp, Warning, TEXT("Stamina Rate: %f"), Stamina);
-			PC->SetHUDStamina(Stamina / MaxStamina);
+			PC->SetHUDStamina(Stamina);
 		}
 	}
 }
@@ -167,10 +167,12 @@ void AOTCharacterBase::SprintPressed(const FInputActionValue& Value)
 
 void AOTCharacterBase::SprintReleased(const FInputActionValue& Value)
 {
-	if (bIsSprinting)
-	{
-		ServerToggleSprint(false);
-	}
+	ServerToggleSprint(false);
+}
+
+bool AOTCharacterBase::CanSprint() const
+{
+	return Stamina > MinStaminaToSprint;
 }
 
 void AOTCharacterBase::ConsumeStamina(float DeltaTime)
@@ -191,7 +193,7 @@ void AOTCharacterBase::RegenerateStamina(float DeltaTime)
 
 void AOTCharacterBase::ServerToggleSprint_Implementation(bool bShouldSprint)
 {
-	if (bShouldSprint && (Stamina > MinStaminaToSprint))
+	if (bShouldSprint && CanSprint())
 	{
 		bIsSprinting = true;
 		GetCharacterMovement()->MaxWalkSpeed = SprintSpeed;

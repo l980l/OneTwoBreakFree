@@ -3,12 +3,14 @@
 #include "OTMatchGameMode.h"
 #include "PCGComponent.h"
 #include "OneTwoBreakFree/GameState/OTMatchGameState.h"
+#include "OneTwoBreakFree/PlayerController/OTPlayerController.h"
 #include "Net/UnrealNetwork.h"
 #include "Kismet/GameplayStatics.h"
 #include "Components/SplineComponent.h"
 
 AOTMatchGameMode::AOTMatchGameMode()
 {
+    bDelayedStart = true;
 }
 
 void AOTMatchGameMode::BeginPlay()
@@ -27,6 +29,20 @@ void AOTMatchGameMode::PostLogin(APlayerController* NewPlayer)
     UE_LOG(LogTemp, Log, TEXT("Player joined: %s. Current count: %d/%d"), *NewPlayer->GetName(), CurrentPlayerCount, MaxPlayers);
 
     CheckAndStartGameIfReady();
+}
+
+void AOTMatchGameMode::OnMatchStateSet()
+{
+    Super::OnMatchStateSet();
+
+    for (FConstPlayerControllerIterator iter = GetWorld()->GetPlayerControllerIterator(); iter; ++iter)
+    {
+        AOTPlayerController* OTPlayer = Cast<AOTPlayerController>(*iter);
+        if (OTPlayer)
+        {
+            OTPlayer->OnMatchStateSet(MatchState);
+        }
+    }
 }
 
 void AOTMatchGameMode::StartPCGMapGeneration()
@@ -84,7 +100,7 @@ void AOTMatchGameMode::CheckAndStartGameIfReady()
 {
     int32 CurrentPlayerCount = GetWorld()->GetNumPlayerControllers();
 
-    if (!bIsGameStarted && bIsMapGenerated && CurrentPlayerCount >= MaxPlayers)
+    if ((MatchState == MatchState::WaitingToStart) && bIsMapGenerated && CurrentPlayerCount >= MaxPlayers)
     {
         StartGame();
     }
@@ -92,7 +108,7 @@ void AOTMatchGameMode::CheckAndStartGameIfReady()
 
 void AOTMatchGameMode::StartGame()
 {
-    if (bIsGameStarted)
+    if (MatchState == MatchState::InProgress)
         return;
 
     int32 CurrentPlayerCount = GetWorld()->GetNumPlayerControllers();
@@ -101,10 +117,10 @@ void AOTMatchGameMode::StartGame()
     TArray<FVector> SpawnLocations = FindPlayerSpawnLocations(CurrentPlayerCount);
 
     TeleportPlayersToLocations(SpawnLocations);
+    
+    StartMatch();
 
-    bIsGameStarted = true;
-
-    UE_LOG(LogTemp, Log, TEXT("Game started successfully!"));
+    UE_LOG(LogTemp, Log, TEXT("Match started successfully!"));
 }
 
 void AOTMatchGameMode::CalculateMapBounds()
@@ -304,7 +320,8 @@ void AOTMatchGameMode::TeleportPlayersToLocations(const TArray<FVector>& Locatio
             }
 
             // RestartPlayer 사용 - 이것이 레플리케이션을 올바르게 처리함
-            RestartPlayerAtTransform(PC, FTransform(SpawnLocation));
+            // RestartPlayerAtTransform(PC, FTransform(SpawnLocation));
+            RestartPlayerAtTransform(PC, FTransform(FVector(0, 0, 120)));
 
             UE_LOG(LogTemp, Log, TEXT("Teleported player %s to: (%f, %f, %f)"), *PC->GetName(), SpawnLocation.X, SpawnLocation.Y, SpawnLocation.Z);
 

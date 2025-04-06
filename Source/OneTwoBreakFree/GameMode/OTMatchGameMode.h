@@ -19,9 +19,6 @@ class ONETWOBREAKFREE_API AOTMatchGameMode : public AGameMode
 public:
 	AOTMatchGameMode();
 
-    virtual void BeginPlay() override;
-    virtual void PostLogin(APlayerController* NewPlayer) override;
-
     UFUNCTION()
     void OnPCGGenerationCompleted(UPCGComponent* InPCGComponent);
 
@@ -34,7 +31,6 @@ public:
     UPROPERTY(Transient)
     TObjectPtr<AActor> PCGBackroomsActor;
 
-    // 플레이어 스폰 관련 설정
     UPROPERTY(EditDefaultsOnly, Category = "PlayerSpawn")
     float MinDistanceBetweenPlayers = 1000.0f;
 
@@ -57,6 +53,10 @@ public:
     FVector MapMax;
 
 protected:
+    virtual void BeginPlay() override;
+    virtual void PostLogin(APlayerController* NewPlayer) override;
+    virtual void OnMatchStateSet() override;
+
     UFUNCTION()
     void StartGame();
     void CheckAndStartGameIfReady();
@@ -69,7 +69,5 @@ protected:
 
     void TeleportPlayersToLocations(const TArray<FVector>& Locations);
 
-    // 상태 변수
     bool bIsMapGenerated = false;
-    bool bIsGameStarted = false;
 };

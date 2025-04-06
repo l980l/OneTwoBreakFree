@@ -40,10 +40,10 @@ protected:
     float Stamina = 100.0f;
 
     UPROPERTY(EditDefaultsOnly, Category = "Stamina")
-    float StaminaConsumptionRate = 20.0f; // 초당 소모량
+    float StaminaConsumptionRate = 20.0f;
 
     UPROPERTY(EditDefaultsOnly, Category = "Stamina")
-    float StaminaRegenerationRate = 10.0f; // 초당 회복량
+    float StaminaRegenerationRate = 10.0f;
 
     UPROPERTY(EditDefaultsOnly, Category = "Stamina")
     float MinStaminaToSprint = 10.0f; // 달리기 위한 최소 스테미나
