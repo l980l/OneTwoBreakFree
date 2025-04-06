@@ -36,7 +36,7 @@ AOTCharacterBase::AOTCharacterBase()
 
 	FirstPersonMesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("FirstPersonMesh"));
 	FirstPersonMesh->SetupAttachment(FirstPersonCamera);
-	FirstPersonMesh->SetRelativeLocation(FVector(-30.0f, 0.0f, -150.0f));
+	FirstPersonMesh->SetRelativeLocation(FVector(-10.0f, 0.0f, -130.0f));
 	FirstPersonMesh->SetRelativeRotation(FRotator(0.0f, -90.0f, 0.0f));
 	FirstPersonMesh->SetOnlyOwnerSee(true);
 	FirstPersonMesh->bCastDynamicShadow = false;

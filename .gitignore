@@ -14,3 +14,4 @@ Saved
 *.xcodeproj
 *.xcworkspace
 *.ucas
+/enc_temp_folder

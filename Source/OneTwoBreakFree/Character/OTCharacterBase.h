@@ -48,7 +48,6 @@ protected:
     UPROPERTY(EditDefaultsOnly, Category = "Stamina")
     float MinStaminaToSprint = 10.0f; // 달리기 위한 최소 스테미나
 
-    // 이동 관련 속성
     UPROPERTY(EditDefaultsOnly, Category = "Movement")
     float WalkSpeed = 400.0f;
 
@@ -61,11 +60,9 @@ protected:
     UFUNCTION()
     void OnRep_IsSprinting();
 
-    // Input Mapping Context
     UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Input")
     class UInputMappingContext* DefaultMappingContext;
 
-    // Input Actions
     UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Input")
     class UInputAction* MoveAction;
 
@@ -75,7 +72,6 @@ protected:
     UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Input")
     class UInputAction* SprintAction;
 
-    // Input 함수
     void Move(const FInputActionValue& Value);
     void Look(const FInputActionValue& Value);
     void SprintPressed(const FInputActionValue& Value);
@@ -85,7 +81,6 @@ protected:
 
     void RegenerateStamina(float DeltaTime);
 
-    // 달리기 함수
     UFUNCTION(BlueprintCallable, Server, Reliable)
     void ServerToggleSprint(bool bShouldSprint);
 
@@ -95,4 +90,8 @@ public:
 
     UFUNCTION(BlueprintPure, Category = "Stamina")
     float GetMaxStamina() const;
+
+    FORCEINLINE bool GetIsSprinting() { return bIsSprinting; }
+    FORCEINLINE float GetWalkSpeed() { return WalkSpeed; }
+    FORCEINLINE float GetSprintSpeed() { return SprintSpeed; }
 };
