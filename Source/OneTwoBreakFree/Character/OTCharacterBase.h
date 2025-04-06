@@ -81,9 +81,6 @@ protected:
     void SprintPressed(const FInputActionValue& Value);
     void SprintReleased(const FInputActionValue& Value);
 
-    UFUNCTION(BlueprintPure, Category = "Stamina")
-    bool CanSprint() const;
-
     void ConsumeStamina(float DeltaTime);
 
     void RegenerateStamina(float DeltaTime);
