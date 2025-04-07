@@ -18,7 +18,8 @@ AOTCharacterBase::AOTCharacterBase()
 	bReplicates = true;
 	SetReplicatingMovement(true);
 
-	GetCapsuleComponent()->InitCapsuleSize(42.0f, 96.0f);
+	GetCapsuleComponent()->InitCapsuleSize(30.f, 96.0f);
+	GetCapsuleComponent()->SetIsReplicated(true);
 
 	GetCharacterMovement()->MaxWalkSpeed = WalkSpeed;
 	GetCharacterMovement()->bOrientRotationToMovement = false;
@@ -61,6 +62,15 @@ AOTCharacterBase::AOTCharacterBase()
 	GetMesh()->CastShadow = true;
 }
 
+void AOTCharacterBase::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME(AOTCharacterBase, MaxStamina);
+	DOREPLIFETIME(AOTCharacterBase, Stamina);
+	DOREPLIFETIME(AOTCharacterBase, bIsSprinting);
+}
+
 void AOTCharacterBase::BeginPlay()
 {
 	Super::BeginPlay();
@@ -93,7 +103,6 @@ void AOTCharacterBase::Tick(float DeltaTime)
 	{
 		if (AOTPlayerController* PC = Cast<AOTPlayerController>(Controller))
 		{
-			UE_LOG(LogTemp, Warning, TEXT("Stamina Rate: %f"), Stamina);
 			PC->SetHUDStamina(Stamina / MaxStamina);
 		}
 	}
@@ -121,15 +130,6 @@ void AOTCharacterBase::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 			Subsystem->AddMappingContext(DefaultMappingContext, 0);
 		}
 	}
-}
-
-void AOTCharacterBase::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
-{
-	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
-
-	DOREPLIFETIME(AOTCharacterBase, MaxStamina);
-	DOREPLIFETIME(AOTCharacterBase, Stamina);
-	DOREPLIFETIME(AOTCharacterBase, bIsSprinting);
 }
 
 void AOTCharacterBase::Move(const FInputActionValue& Value)
@@ -219,14 +219,4 @@ void AOTCharacterBase::OnRep_IsSprinting()
 	{
 		PC->ShowHUDStamina(bIsSprinting);
 	}
-}
-
-float AOTCharacterBase::GetCurrentStamina() const
-{
-	return Stamina;
-}
-
-float AOTCharacterBase::GetMaxStamina() const
-{
-	return MaxStamina;
 }

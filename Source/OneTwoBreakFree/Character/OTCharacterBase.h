@@ -85,13 +85,9 @@ protected:
     void ServerToggleSprint(bool bShouldSprint);
 
 public:
-    UFUNCTION(BlueprintPure, Category = "Stamina")
-    float GetCurrentStamina() const;
-
-    UFUNCTION(BlueprintPure, Category = "Stamina")
-    float GetMaxStamina() const;
-
-    FORCEINLINE bool GetIsSprinting() { return bIsSprinting; }
-    FORCEINLINE float GetWalkSpeed() { return WalkSpeed; }
-    FORCEINLINE float GetSprintSpeed() { return SprintSpeed; }
+    FORCEINLINE float GetStamina() const { return Stamina; }
+    FORCEINLINE float GetMaxStamina() const { return MaxStamina; }
+    FORCEINLINE bool GetIsSprinting() const { return bIsSprinting; }
+    FORCEINLINE float GetWalkSpeed() const { return WalkSpeed; }
+    FORCEINLINE float GetSprintSpeed() const { return SprintSpeed; }
 };
