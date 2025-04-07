@@ -1,4 +1,5 @@
 Binaries
+Build
 DerivedDataCache
 Intermediate
 Saved
@@ -13,3 +14,4 @@ Saved
 *.xcodeproj
 *.xcworkspace
 *.ucas
+/enc_temp_folder
