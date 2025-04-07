@@ -10,8 +10,10 @@
 #include "GameFramework/SpringArmComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "OneTwoBreakFree/PlayerController/OTPlayerController.h"
+#include "OTCharacterMovementComponent.h"
 
-AOTCharacterBase::AOTCharacterBase()
+AOTCharacterBase::AOTCharacterBase(const FObjectInitializer& ObjectInitializer)
+	: Super(ObjectInitializer.SetDefaultSubobjectClass<UOTCharacterMovementComponent>(ACharacter::CharacterMovementComponentName))
 {
 	PrimaryActorTick.bCanEverTick = true;
 
@@ -19,7 +21,6 @@ AOTCharacterBase::AOTCharacterBase()
 	SetReplicatingMovement(true);
 
 	GetCapsuleComponent()->InitCapsuleSize(30.f, 96.0f);
-	GetCapsuleComponent()->SetIsReplicated(true);
 
 	GetCharacterMovement()->MaxWalkSpeed = WalkSpeed;
 	GetCharacterMovement()->bOrientRotationToMovement = false;

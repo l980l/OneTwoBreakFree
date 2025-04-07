@@ -14,7 +14,7 @@ class ONETWOBREAKFREE_API AOTCitizenCharacter : public AOTCharacterBase
 	GENERATED_BODY()
 
 public:
-    AOTCitizenCharacter();
+    AOTCitizenCharacter(const FObjectInitializer& ObjectInitializer);
 
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
     TObjectPtr<UOTHealthComponent> HealthComponent;

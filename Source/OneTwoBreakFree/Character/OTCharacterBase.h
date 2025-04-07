@@ -13,7 +13,7 @@ class ONETWOBREAKFREE_API AOTCharacterBase : public ACharacter
 	GENERATED_BODY()
 
 public:
-	AOTCharacterBase();
+	AOTCharacterBase(const FObjectInitializer& ObjectInitializer);
 
 protected:
     virtual void BeginPlay() override;
@@ -49,10 +49,10 @@ protected:
     float MinStaminaToSprint = 10.0f; // 달리기 위한 최소 스테미나
 
     UPROPERTY(EditDefaultsOnly, Category = "Movement")
-    float WalkSpeed = 400.0f;
+    float WalkSpeed = 200.f;
 
     UPROPERTY(EditDefaultsOnly, Category = "Movement")
-    float SprintSpeed = 800.0f;
+    float SprintSpeed = 300.0f;
 
     UPROPERTY(ReplicatedUsing = OnRep_IsSprinting)
     uint8 bIsSprinting : 1 = false;
