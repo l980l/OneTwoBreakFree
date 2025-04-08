@@ -10,8 +10,15 @@
 #include "GameFramework/SpringArmComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "OneTwoBreakFree/PlayerController/OTPlayerController.h"
+#include "OTCharacterMovementComponent.h"
+#include "Kismet/KismetSystemLibrary.h"
+#include "Engine/StaticMeshActor.h"
+#include "GeometryCollection/GeometryCollectionComponent.h"
+#include "GeometryCollection/GeometryCollectionActor.h"
 
-AOTCharacterBase::AOTCharacterBase()
+
+AOTCharacterBase::AOTCharacterBase(const FObjectInitializer& ObjectInitializer)
+	: Super(ObjectInitializer.SetDefaultSubobjectClass<UOTCharacterMovementComponent>(ACharacter::CharacterMovementComponentName))
 {
 	PrimaryActorTick.bCanEverTick = true;
 
@@ -19,11 +26,12 @@ AOTCharacterBase::AOTCharacterBase()
 	SetReplicatingMovement(true);
 
 	GetCapsuleComponent()->InitCapsuleSize(30.f, 96.0f);
-	GetCapsuleComponent()->SetIsReplicated(true);
 
 	GetCharacterMovement()->MaxWalkSpeed = WalkSpeed;
 	GetCharacterMovement()->bOrientRotationToMovement = false;
 	GetCharacterMovement()->RotationRate = FRotator(0.0f, 540.0f, 0.0f);
+	GetCharacterMovement()->bIgnoreClientMovementErrorChecksAndCorrection = true;
+	GetCharacterMovement()->bServerAcceptClientAuthoritativePosition = true;
 
 	bUseControllerRotationPitch = false;
 	bUseControllerRotationYaw = true;
@@ -78,6 +86,23 @@ void AOTCharacterBase::BeginPlay()
 	Stamina = MaxStamina;
 }
 
+void AOTCharacterBase::PossessedBy(AController* NewController)
+{
+	Super::PossessedBy(NewController);
+
+	if (IsLocallyControlled())
+	{
+		GetMesh()->HideBoneByName(FName("head"), EPhysBodyOp::PBO_None);
+	}
+}
+
+void AOTCharacterBase::OnRep_Controller()
+{
+	Super::OnRep_Controller();
+
+	GetMesh()->HideBoneByName(FName("head"), EPhysBodyOp::PBO_None);
+}
+
 void AOTCharacterBase::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
@@ -120,6 +145,7 @@ void AOTCharacterBase::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 		EnhancedInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &AOTCharacterBase::Look);
 		EnhancedInputComponent->BindAction(SprintAction, ETriggerEvent::Started, this, &AOTCharacterBase::SprintPressed);
 		EnhancedInputComponent->BindAction(SprintAction, ETriggerEvent::Completed, this, &AOTCharacterBase::SprintReleased);
+		EnhancedInputComponent->BindAction(KickAction, ETriggerEvent::Started, this, &AOTCharacterBase::KickPressed);
 	}
 
 	if (APlayerController* PC = Cast<APlayerController>(GetController()))
@@ -162,6 +188,9 @@ void AOTCharacterBase::Look(const FInputActionValue& Value)
 
 void AOTCharacterBase::SprintPressed(const FInputActionValue& Value)
 {
+	if (bIsKicking)
+		return;
+
 	ServerToggleSprint(true);
 }
 
@@ -171,6 +200,11 @@ void AOTCharacterBase::SprintReleased(const FInputActionValue& Value)
 	{
 		ServerToggleSprint(false);
 	}
+}
+
+void AOTCharacterBase::KickPressed(const FInputActionValue& Value)
+{
+	ServerKick();
 }
 
 void AOTCharacterBase::ConsumeStamina(float DeltaTime)
@@ -218,5 +252,151 @@ void AOTCharacterBase::OnRep_IsSprinting()
 	if (AOTPlayerController* PC = Cast<AOTPlayerController>(Controller))
 	{
 		PC->ShowHUDStamina(bIsSprinting);
+	}
+}
+
+void AOTCharacterBase::ServerKick_Implementation()
+{
+	if (bIsKicking)
+		return;
+
+	MulticastKick();
+}
+
+void AOTCharacterBase::MulticastKick_Implementation()
+{
+	bIsKicking = true;
+
+	if (ThirdPersonKickMontage)
+	{
+		UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+		AnimInstance->Montage_Play(ThirdPersonKickMontage, 1.f);
+
+		FOnMontageEnded EndDelegate;
+		EndDelegate.BindUObject(this, &AOTCharacterBase::OnKickMontageEnded);
+		AnimInstance->Montage_SetEndDelegate(EndDelegate, ThirdPersonKickMontage);
+
+		GetMesh()->SetOwnerNoSee(false);
+		FirstPersonMesh->SetOwnerNoSee(true);
+	}
+
+	GetCharacterMovement()->MovementMode = EMovementMode::MOVE_None;
+}
+
+void AOTCharacterBase::OnKickMontageEnded(UAnimMontage* Montage, bool bInterrupted)
+{
+	if (Montage == ThirdPersonKickMontage)
+	{
+		bIsKicking = false;
+		GetMesh()->SetOwnerNoSee(true);
+		FirstPersonMesh->SetOwnerNoSee(false);
+	}
+
+	GetCharacterMovement()->MovementMode = EMovementMode::MOVE_Walking;
+}
+
+void AOTCharacterBase::KickImpact()
+{
+	if (!IsLocallyControlled())
+		return;
+
+	FHitResult HitResult;
+	FVector Start = GetActorLocation();
+	FVector End = Start + GetActorForwardVector() * KickRange;
+
+	// 트레이스 실행
+	if (GetWorld()->LineTraceSingleByChannel(HitResult, Start, End, ECC_Visibility))
+	{
+		// 벽인지 확인
+		AStaticMeshActor* WallActor = Cast<AStaticMeshActor>(HitResult.GetActor());
+		if (WallActor && WallActor->Tags.Contains("DestructibleWall"))
+		{
+			if (!HasAuthority())
+			{
+				ServerTriggerWallDestruction(HitResult.ImpactPoint, WallActor->GetActorLocation(), WallActor->GetActorRotation());
+			}
+			else
+			{
+				MulticastTriggerWallDestruction(HitResult.ImpactPoint, WallActor->GetActorLocation(), WallActor->GetActorRotation());
+			}
+		}
+	}
+}
+
+void AOTCharacterBase::ServerTriggerWallDestruction_Implementation(FVector_NetQuantize ImpactPoint, FVector_NetQuantize WallLocation, FRotator WallRotation)
+{
+	MulticastTriggerWallDestruction(ImpactPoint, WallLocation, WallRotation);
+}
+
+void AOTCharacterBase::MulticastTriggerWallDestruction_Implementation(FVector_NetQuantize ImpactPoint, FVector_NetQuantize WallLocation, FRotator WallRotation)
+{
+	TriggerWallDestruction(ImpactPoint, WallLocation, WallRotation);
+}
+
+void AOTCharacterBase::TriggerWallDestruction(FVector_NetQuantize ImpactPoint, FVector_NetQuantize WallLocation, FRotator WallRotation)
+{
+	// PCG로 생성된 위치에 있는 벽을 찾기
+	TArray<AActor*> OverlappingActors;
+	UKismetSystemLibrary::SphereOverlapActors(GetWorld(), WallLocation, 10.0f, TArray<TEnumAsByte<EObjectTypeQuery>>(), AStaticMeshActor::StaticClass(), TArray<AActor*>(), OverlappingActors);
+
+	for (AActor* Actor : OverlappingActors)
+	{
+		AStaticMeshActor* WallActor = Cast<AStaticMeshActor>(Actor);
+		if (WallActor && WallActor->Tags.Contains("DestructibleWall"))
+		{
+			// 기존 벽 비활성화
+			WallActor->SetActorHiddenInGame(true);
+			WallActor->SetActorEnableCollision(false);
+
+			if (!DestructibleWallClass)
+				break;
+
+			// GeometryCollection 스폰
+			FActorSpawnParameters SpawnParams;
+			
+			AGeometryCollectionActor* DestructibleWall = GetWorld()->SpawnActor<AGeometryCollectionActor>(DestructibleWallClass, WallLocation, WallRotation, SpawnParams);
+
+			if (DestructibleWall)
+			{
+				// 스케일 맞추기
+				DestructibleWall->SetActorScale3D(WallActor->GetActorScale3D());
+
+				// 바로 파괴 트리거
+				UGeometryCollectionComponent* GeoComp = DestructibleWall->GetGeometryCollectionComponent();
+				if (GeoComp)
+				{
+					// 약간의 딜레이를 두고 파괴 (렌더링 보장)
+					FTimerHandle BreakTimerHandle;
+
+					GetWorld()->GetTimerManager().SetTimer(BreakTimerHandle, [GeoComp, ImpactPoint, WallLocation]()
+						{
+						FVector ImpactDirection = (ImpactPoint - WallLocation).GetSafeNormal();
+						// 충격점에서 파괴력 적용
+						GeoComp->AddImpulseAtLocation(ImpactDirection * 1000000.0f, ImpactPoint);
+
+						}, 0.1f, false);
+
+					// 제거 타이머 설정
+					FTimerHandle DestroyTimerHandle;
+					FTimerDelegate DestroyDelegate;
+					DestroyDelegate.BindLambda([DestructibleWall, WallActor]()
+						{
+							if (DestructibleWall)
+							{
+								DestructibleWall->Destroy();
+							}
+							/*if (WallActor)
+							{
+								WallActor->Destroy();
+							}*/
+						});
+
+					GetWorldTimerManager().SetTimer(DestroyTimerHandle, DestroyDelegate, 10.0f, false);
+				}
+			}
+
+			// 첫 번째 일치하는 벽만 처리
+			break;
+		}
 	}
 }

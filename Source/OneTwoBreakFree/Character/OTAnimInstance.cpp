@@ -33,10 +33,22 @@ void UOTAnimInstance::NativeUpdateAnimation(float DeltaTime)
 		const FRotator VelocityRotation = UKismetMathLibrary::MakeRotFromX(Velocity);
 
 		float YawDelta = UKismetMathLibrary::NormalizedDeltaRotator(VelocityRotation, ActorRotation).Yaw;
-		Direction = YawDelta;
+
+		if (YawDelta > 90.f)
+		{
+			YawDelta = 180.f - YawDelta;
+		}
+		else if (YawDelta < -90.f)
+		{
+			YawDelta = -180.f - YawDelta;
+		}
+
+		const float ProperSizeUpNum = 2.f;
+		Direction = YawDelta * ProperSizeUpNum;
+		Direction = FMath::Clamp(Direction, -100.0f, 100.0f);
 
 		const FVector ForwardVector = OTCharacter->GetActorForwardVector();
-		ForwardMovement = FVector::DotProduct(ForwardVector, Velocity.GetSafeNormal()) * 100.0f;
+		ForwardMovement = FVector::DotProduct(ForwardVector, Velocity.GetSafeNormal()) * 100.0f * ProperSizeUpNum;
 
 		ForwardMovement = FMath::Clamp(ForwardMovement, -100.0f, 100.0f);
 	}

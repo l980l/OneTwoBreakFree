@@ -1,0 +1,1 @@
+UnrealEditor.exe %cd%\OneTwoBreakFree.uproject -NetTrace=1 -trace=net -tracehost=localhost

@@ -5,8 +5,10 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "OneTwoBreakFree/CharacterComponent/OTHealthComponent.h"
 #include "Components/CapsuleComponent.h"
+#include "OTCharacterMovementComponent.h"
 
-AOTCitizenCharacter::AOTCitizenCharacter()
+AOTCitizenCharacter::AOTCitizenCharacter(const FObjectInitializer& ObjectInitializer)
+	: Super(ObjectInitializer.SetDefaultSubobjectClass<UOTCharacterMovementComponent>(ACharacter::CharacterMovementComponentName))
 {
 	HealthComponent = CreateDefaultSubobject<UOTHealthComponent>(TEXT("HealthComponent"));
 }
