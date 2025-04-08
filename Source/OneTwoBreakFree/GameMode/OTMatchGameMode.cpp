@@ -321,7 +321,7 @@ void AOTMatchGameMode::TeleportPlayersToLocations(const TArray<FVector>& Locatio
 
             // RestartPlayer 사용 - 이것이 레플리케이션을 올바르게 처리함
             // RestartPlayerAtTransform(PC, FTransform(SpawnLocation));
-            RestartPlayerAtTransform(PC, FTransform(FVector(0, 0, 120)));
+            RestartPlayerAtTransform(PC, FTransform(FVector(-100, 100, 120)));
 
             UE_LOG(LogTemp, Log, TEXT("Teleported player %s to: (%f, %f, %f)"), *PC->GetName(), SpawnLocation.X, SpawnLocation.Y, SpawnLocation.Z);
 

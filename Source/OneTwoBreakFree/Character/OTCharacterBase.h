@@ -17,21 +17,26 @@ public:
 
 protected:
     virtual void BeginPlay() override;
+    virtual void PossessedBy(AController* NewController) override;
+    virtual void OnRep_Controller() override;
     virtual void Tick(float DeltaTime) override;
     virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
     virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
-    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Camera")
-    class UCameraComponent* FirstPersonCamera;
+    UFUNCTION(BlueprintCallable)
+    void KickImpact();
 
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Camera")
-    class UCameraComponent* ThirdPersonCamera;
+    TObjectPtr<class UCameraComponent> FirstPersonCamera;
 
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Camera")
-    class USpringArmComponent* CameraBoom;
+    TObjectPtr<class UCameraComponent> ThirdPersonCamera;
+
+    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Camera")
+    TObjectPtr<class USpringArmComponent> CameraBoom;
 
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Mesh")
-    class USkeletalMeshComponent* FirstPersonMesh;
+    TObjectPtr<class USkeletalMeshComponent> FirstPersonMesh;
 
     UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Stamina", Replicated)
     float MaxStamina = 100.0f;
@@ -52,37 +57,68 @@ protected:
     float WalkSpeed = 200.f;
 
     UPROPERTY(EditDefaultsOnly, Category = "Movement")
-    float SprintSpeed = 300.0f;
+    float SprintSpeed = 400.0f;
 
-    UPROPERTY(ReplicatedUsing = OnRep_IsSprinting)
-    uint8 bIsSprinting : 1 = false;
-
-    UFUNCTION()
-    void OnRep_IsSprinting();
+    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Kick")
+    float KickRange = 150.0f;
 
     UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Input")
-    class UInputMappingContext* DefaultMappingContext;
+    TObjectPtr<class UInputMappingContext> DefaultMappingContext;
 
     UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Input")
-    class UInputAction* MoveAction;
+    TObjectPtr<class UInputAction> MoveAction;
 
     UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Input")
-    class UInputAction* LookAction;
+    TObjectPtr<class UInputAction> LookAction;
 
     UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Input")
-    class UInputAction* SprintAction;
+    TObjectPtr<class UInputAction> SprintAction;
 
+    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Input")
+    TObjectPtr<class UInputAction> KickAction;
+
+    UPROPERTY(EditDefaultsOnly, Category = "Animation")
+    TObjectPtr<class UAnimMontage> ThirdPersonKickMontage;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Kick")
+    TSubclassOf<class AGeometryCollectionActor> DestructibleWallClass;
+
+private:
     void Move(const FInputActionValue& Value);
     void Look(const FInputActionValue& Value);
     void SprintPressed(const FInputActionValue& Value);
     void SprintReleased(const FInputActionValue& Value);
+    void KickPressed(const FInputActionValue& Value);
 
     void ConsumeStamina(float DeltaTime);
-
     void RegenerateStamina(float DeltaTime);
 
-    UFUNCTION(BlueprintCallable, Server, Reliable)
+    UFUNCTION(Server, Reliable)
     void ServerToggleSprint(bool bShouldSprint);
+
+    UFUNCTION(Server, Reliable)
+    void ServerKick();
+    
+    UFUNCTION(NetMulticast, Reliable)
+    void MulticastKick();
+
+    UFUNCTION(Server, Reliable)
+    void ServerTriggerWallDestruction(FVector_NetQuantize ImpactPoint, FVector_NetQuantize WallLocation, FRotator WallRotation);
+
+    UFUNCTION(NetMulticast, Reliable)
+    void MulticastTriggerWallDestruction(FVector_NetQuantize ImpactPoint, FVector_NetQuantize WallLocation, FRotator WallRotation);
+
+    void OnKickMontageEnded(class UAnimMontage* Montage, bool bInterrupted);
+
+    void TriggerWallDestruction(FVector_NetQuantize ImpactPoint, FVector_NetQuantize WallLocation, FRotator WallRotation);
+
+    UFUNCTION()
+    void OnRep_IsSprinting();
+
+    UPROPERTY(ReplicatedUsing = OnRep_IsSprinting)
+    uint8 bIsSprinting : 1 = false;
+
+    uint8 bIsKicking : 1 = false;
 
 public:
     FORCEINLINE float GetStamina() const { return Stamina; }
