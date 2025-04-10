@@ -30,14 +30,17 @@ AOTCharacterBase::AOTCharacterBase(const FObjectInitializer& ObjectInitializer)
 	GetCharacterMovement()->MaxWalkSpeed = WalkSpeed;
 	GetCharacterMovement()->bOrientRotationToMovement = false;
 	GetCharacterMovement()->RotationRate = FRotator(0.0f, 540.0f, 0.0f);
-	GetCharacterMovement()->bIgnoreClientMovementErrorChecksAndCorrection = true;
-	GetCharacterMovement()->bServerAcceptClientAuthoritativePosition = true;
+	/*GetCharacterMovement()->bIgnoreClientMovementErrorChecksAndCorrection = true;
+	GetCharacterMovement()->bServerAcceptClientAuthoritativePosition = true;*/
+
+	GetCharacterMovement()->NetworkSmoothingMode = ENetworkSmoothingMode::Linear;
+	GetCharacterMovement()->NetworkMaxSmoothUpdateDistance = 0.0f; // 즉시 교정
+	GetCharacterMovement()->NetworkNoSmoothUpdateDistance = 0.0f;  // 스무딩 없이 즉시 교정
 
 	bUseControllerRotationPitch = false;
 	bUseControllerRotationYaw = true;
 	bUseControllerRotationRoll = false;
 
-	// 1인칭 
 	FirstPersonCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("FirstPersonCamera"));
 	FirstPersonCamera->SetupAttachment(GetRootComponent());
 	FirstPersonCamera->SetRelativeLocation(FVector(0.0f, 0.0f, 64.0f));
@@ -51,7 +54,6 @@ AOTCharacterBase::AOTCharacterBase(const FObjectInitializer& ObjectInitializer)
 	FirstPersonMesh->bCastDynamicShadow = false;
 	FirstPersonMesh->CastShadow = false;
 
-	// 3인칭 
 	CameraBoom = CreateDefaultSubobject<USpringArmComponent>(TEXT("CameraBoom"));
 	CameraBoom->SetupAttachment(GetRootComponent());
 	CameraBoom->TargetArmLength = 300.f;
@@ -74,6 +76,7 @@ void AOTCharacterBase::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& Out
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
+	DOREPLIFETIME(AOTCharacterBase, CharacterRole);
 	DOREPLIFETIME(AOTCharacterBase, MaxStamina);
 	DOREPLIFETIME(AOTCharacterBase, Stamina);
 	DOREPLIFETIME(AOTCharacterBase, bIsSprinting);
@@ -204,7 +207,15 @@ void AOTCharacterBase::SprintReleased(const FInputActionValue& Value)
 
 void AOTCharacterBase::KickPressed(const FInputActionValue& Value)
 {
-	ServerKick();
+	if (!bIsKicking)
+	{
+		ServerKick();
+	}
+	
+	if (bIsSprinting)
+	{
+		ServerToggleSprint(false);
+	}
 }
 
 void AOTCharacterBase::ConsumeStamina(float DeltaTime)
@@ -257,9 +268,6 @@ void AOTCharacterBase::OnRep_IsSprinting()
 
 void AOTCharacterBase::ServerKick_Implementation()
 {
-	if (bIsKicking)
-		return;
-
 	MulticastKick();
 }
 
@@ -304,10 +312,8 @@ void AOTCharacterBase::KickImpact()
 	FVector Start = GetActorLocation();
 	FVector End = Start + GetActorForwardVector() * KickRange;
 
-	// 트레이스 실행
 	if (GetWorld()->LineTraceSingleByChannel(HitResult, Start, End, ECC_Visibility))
 	{
-		// 벽인지 확인
 		AStaticMeshActor* WallActor = Cast<AStaticMeshActor>(HitResult.GetActor());
 		if (WallActor && WallActor->Tags.Contains("DestructibleWall"))
 		{
@@ -335,33 +341,27 @@ void AOTCharacterBase::MulticastTriggerWallDestruction_Implementation(FVector_Ne
 
 void AOTCharacterBase::TriggerWallDestruction(FVector_NetQuantize ImpactPoint, FVector_NetQuantize WallLocation, FRotator WallRotation)
 {
-	// PCG로 생성된 위치에 있는 벽을 찾기
 	TArray<AActor*> OverlappingActors;
 	UKismetSystemLibrary::SphereOverlapActors(GetWorld(), WallLocation, 10.0f, TArray<TEnumAsByte<EObjectTypeQuery>>(), AStaticMeshActor::StaticClass(), TArray<AActor*>(), OverlappingActors);
+
+	ensureMsgf(DestructibleWallClass, TEXT("DestructibleWallClass is null"));
 
 	for (AActor* Actor : OverlappingActors)
 	{
 		AStaticMeshActor* WallActor = Cast<AStaticMeshActor>(Actor);
 		if (WallActor && WallActor->Tags.Contains("DestructibleWall"))
 		{
-			// 기존 벽 비활성화
 			WallActor->SetActorHiddenInGame(true);
 			WallActor->SetActorEnableCollision(false);
 
-			if (!DestructibleWallClass)
-				break;
-
-			// GeometryCollection 스폰
 			FActorSpawnParameters SpawnParams;
 			
 			AGeometryCollectionActor* DestructibleWall = GetWorld()->SpawnActor<AGeometryCollectionActor>(DestructibleWallClass, WallLocation, WallRotation, SpawnParams);
 
 			if (DestructibleWall)
 			{
-				// 스케일 맞추기
 				DestructibleWall->SetActorScale3D(WallActor->GetActorScale3D());
 
-				// 바로 파괴 트리거
 				UGeometryCollectionComponent* GeoComp = DestructibleWall->GetGeometryCollectionComponent();
 				if (GeoComp)
 				{
@@ -371,12 +371,10 @@ void AOTCharacterBase::TriggerWallDestruction(FVector_NetQuantize ImpactPoint, F
 					GetWorld()->GetTimerManager().SetTimer(BreakTimerHandle, [GeoComp, ImpactPoint, WallLocation]()
 						{
 						FVector ImpactDirection = (ImpactPoint - WallLocation).GetSafeNormal();
-						// 충격점에서 파괴력 적용
 						GeoComp->AddImpulseAtLocation(ImpactDirection * 1000000.0f, ImpactPoint);
 
 						}, 0.1f, false);
 
-					// 제거 타이머 설정
 					FTimerHandle DestroyTimerHandle;
 					FTimerDelegate DestroyDelegate;
 					DestroyDelegate.BindLambda([DestructibleWall, WallActor]()
@@ -385,18 +383,11 @@ void AOTCharacterBase::TriggerWallDestruction(FVector_NetQuantize ImpactPoint, F
 							{
 								DestructibleWall->Destroy();
 							}
-							/*if (WallActor)
-							{
-								WallActor->Destroy();
-							}*/
 						});
 
 					GetWorldTimerManager().SetTimer(DestroyTimerHandle, DestroyDelegate, 10.0f, false);
 				}
 			}
-
-			// 첫 번째 일치하는 벽만 처리
-			break;
 		}
 	}
 }

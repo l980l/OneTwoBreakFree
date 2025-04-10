@@ -38,10 +38,10 @@ public:
     UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Health", Replicated)
     float MaxHealth;
 
-    UPROPERTY(BlueprintReadOnly, Category = "Health")
+    UPROPERTY(BlueprintReadOnly, Category = "Health", Replicated)
     float Health;
 
-    UPROPERTY(BlueprintReadOnly, Category = "Health")
+    UPROPERTY(BlueprintReadOnly, Category = "Health", Replicated)
     uint8 bIsDead : 1;
 
     UFUNCTION(NetMulticast, Reliable)

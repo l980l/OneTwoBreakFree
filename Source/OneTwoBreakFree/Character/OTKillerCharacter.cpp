@@ -2,4 +2,11 @@
 
 
 #include "OTKillerCharacter.h"
+#include "GameFramework/CharacterMovementComponent.h"
+#include "OTCharacterMovementComponent.h"
 
+AOTKillerCharacter::AOTKillerCharacter(const FObjectInitializer& ObjectInitializer)
+	: Super(ObjectInitializer.SetDefaultSubobjectClass<UOTCharacterMovementComponent>(ACharacter::CharacterMovementComponentName))
+{
+	CharacterRole = EOTCharacterRole::ECR_Killer;
+}

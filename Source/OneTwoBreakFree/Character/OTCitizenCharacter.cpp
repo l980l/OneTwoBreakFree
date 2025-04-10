@@ -11,10 +11,13 @@ AOTCitizenCharacter::AOTCitizenCharacter(const FObjectInitializer& ObjectInitial
 	: Super(ObjectInitializer.SetDefaultSubobjectClass<UOTCharacterMovementComponent>(ACharacter::CharacterMovementComponentName))
 {
 	HealthComponent = CreateDefaultSubobject<UOTHealthComponent>(TEXT("HealthComponent"));
+	CharacterRole = EOTCharacterRole::ECR_Citizen;
 }
 
 void AOTCitizenCharacter::BeginPlay()
 {
+	Super::BeginPlay();
+
 	// 체력 컴포넌트 이벤트 바인딩
 	if (HealthComponent)
 	{

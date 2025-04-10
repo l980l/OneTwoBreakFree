@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "OneTwoBreakFree/Character/OTCharacterBase.h"
 #include "GameFramework/GameMode.h"
 #include "OTMatchGameMode.generated.h"
 
@@ -52,21 +53,26 @@ public:
     UPROPERTY(Transient)
     FVector MapMax;
 
-protected:
+    UPROPERTY(Transient, BlueprintReadOnly, Category = "Game")
+    TObjectPtr<APlayerController> KillerPlayerController;
+
+    UPROPERTY(EditDefaultsOnly, Category = "Character")
+    TSubclassOf<AOTCharacterBase> KillerCharacterClass;
+
+    UPROPERTY(EditDefaultsOnly, Category = "Character")
+    TSubclassOf<AOTCharacterBase> CitizenCharacterClass;
+
+private:
     virtual void BeginPlay() override;
     virtual void PostLogin(APlayerController* NewPlayer) override;
     virtual void OnMatchStateSet() override;
 
-    UFUNCTION()
     void StartGame();
     void CheckAndStartGameIfReady();
-
     void CalculateMapBounds();
-
+    void AssignPlayerRoles();
     TArray<FVector> FindPlayerSpawnLocations(int32 CountPlayers);
-
     bool IsValidSpawnLocation(const FVector& Location, const TArray<FVector>& ExistingLocations);
-
     void TeleportPlayersToLocations(const TArray<FVector>& Locations);
 
     bool bIsMapGenerated = false;

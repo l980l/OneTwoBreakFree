@@ -7,6 +7,15 @@
 #include "InputActionValue.h"
 #include "OTCharacterBase.generated.h"
 
+UENUM(BlueprintType)
+enum class EOTCharacterRole : uint8
+{
+    ECR_None        UMETA(DisplayName = "None"),
+    ECR_Killer      UMETA(DisplayName = "Killer"),
+    ECR_Citizen     UMETA(DisplayName = "Citizen"),
+    ECR_Spectator   UMETA(DisplayName = "Spectator")
+};
+
 UCLASS()
 class ONETWOBREAKFREE_API AOTCharacterBase : public ACharacter
 {
@@ -26,6 +35,9 @@ protected:
     UFUNCTION(BlueprintCallable)
     void KickImpact();
 
+    UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite, Category = "Character")
+    EOTCharacterRole CharacterRole = EOTCharacterRole::ECR_None;
+
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Camera")
     TObjectPtr<class UCameraComponent> FirstPersonCamera;
 
@@ -38,10 +50,10 @@ protected:
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Mesh")
     TObjectPtr<class USkeletalMeshComponent> FirstPersonMesh;
 
-    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Stamina", Replicated)
+    UPROPERTY(Replicated, EditDefaultsOnly, BlueprintReadOnly, Category = "Stamina")
     float MaxStamina = 100.0f;
 
-    UPROPERTY(BlueprintReadOnly, Category = "Stamina", Replicated)
+    UPROPERTY(Replicated, BlueprintReadOnly, Category = "Stamina")
     float Stamina = 100.0f;
 
     UPROPERTY(EditDefaultsOnly, Category = "Stamina")
@@ -121,6 +133,7 @@ private:
     uint8 bIsKicking : 1 = false;
 
 public:
+    FORCEINLINE EOTCharacterRole GetCharacterRole() const { return CharacterRole; }
     FORCEINLINE float GetStamina() const { return Stamina; }
     FORCEINLINE float GetMaxStamina() const { return MaxStamina; }
     FORCEINLINE bool GetIsSprinting() const { return bIsSprinting; }

@@ -13,5 +13,7 @@ UCLASS()
 class ONETWOBREAKFREE_API AOTKillerCharacter : public AOTCharacterBase
 {
 	GENERATED_BODY()
-	
+
+public:
+	AOTKillerCharacter(const FObjectInitializer& ObjectInitializer);
 };

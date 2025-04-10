@@ -7,6 +7,7 @@
 #include "Net/UnrealNetwork.h"
 #include "Kismet/GameplayStatics.h"
 #include "Components/SplineComponent.h"
+#include "GameFramework/PlayerState.h"
 
 AOTMatchGameMode::AOTMatchGameMode()
 {
@@ -114,6 +115,8 @@ void AOTMatchGameMode::StartGame()
     int32 CurrentPlayerCount = GetWorld()->GetNumPlayerControllers();
     UE_LOG(LogTemp, Log, TEXT("Starting game with %d players"), CurrentPlayerCount);
 
+    AssignPlayerRoles();
+
     TArray<FVector> SpawnLocations = FindPlayerSpawnLocations(CurrentPlayerCount);
 
     TeleportPlayersToLocations(SpawnLocations);
@@ -167,6 +170,35 @@ void AOTMatchGameMode::CalculateMapBounds()
 	MapMax.Z = FMath::Max(MapMax.Z, 300.0f);
 
 	UE_LOG(LogTemp, Log, TEXT("Map Bounds: Min(%f, %f, %f), Max(%f, %f, %f)"), MapMin.X, MapMin.Y, MapMin.Z, MapMax.X, MapMax.Y, MapMax.Z);
+}
+
+void AOTMatchGameMode::AssignPlayerRoles()
+{
+    TArray<APlayerController*> PlayerControllers;
+    for (FConstPlayerControllerIterator Iterator = GetWorld()->GetPlayerControllerIterator(); Iterator; ++Iterator)
+    {
+        APlayerController* PC = Iterator->Get();
+        if (PC)
+        {
+            PlayerControllers.Add(PC);
+        }
+    }
+
+    if (PlayerControllers.Num() == 0)
+        return;
+
+    int32 KillerIndex = FMath::RandRange(0, PlayerControllers.Num() - 1);
+    KillerPlayerController = PlayerControllers[KillerIndex];
+
+
+    // 디버깅 코드
+    for (int32 i = 0; i < PlayerControllers.Num(); i++)
+    {
+        APlayerController* PC = PlayerControllers[i];
+        EOTCharacterRole CharacterRole = (i == KillerIndex) ? EOTCharacterRole::ECR_Killer : EOTCharacterRole::ECR_Citizen;
+
+        UE_LOG(LogTemp, Log, TEXT("Assigned role to player %s: %s"), *PC->GetPlayerState<APlayerState>()->GetPlayerName(), (CharacterRole == EOTCharacterRole::ECR_Killer) ? TEXT("Killer") : TEXT("Citizen"));
+    }
 }
 
 TArray<FVector> AOTMatchGameMode::FindPlayerSpawnLocations(int32 CountPlayers)
@@ -239,7 +271,6 @@ TArray<FVector> AOTMatchGameMode::FindPlayerSpawnLocations(int32 CountPlayers)
                     // 바닥 위에 적절한 높이로 위치 설정
                     FVector PotentialLocation = HitResult.Location + FVector(0, 0, PlayerSpawnHeight);
 
-                    // 위치 유효성 확인
                     if (IsValidSpawnLocation(PotentialLocation, SpawnLocations))
                     {
                         SpawnLocations.Add(PotentialLocation);
@@ -252,7 +283,6 @@ TArray<FVector> AOTMatchGameMode::FindPlayerSpawnLocations(int32 CountPlayers)
         }
     }
 
-    // 위치를 찾지 못했다면 경고
     if (SpawnLocations.Num() < CountPlayers)
     {
         UE_LOG(LogTemp, Error, TEXT("Could not find enough spawn locations. Found: %d, Needed: %d"), SpawnLocations.Num(), CountPlayers);
@@ -313,15 +343,28 @@ void AOTMatchGameMode::TeleportPlayersToLocations(const TArray<FVector>& Locatio
             int32 SafeIndex = LocationIndex % Locations.Num();
             FVector SpawnLocation = Locations[SafeIndex];
 
-            // 기존 폰 제거 (필요 시)
             if (PC->GetPawn())
             {
                 PC->GetPawn()->Destroy();
             }
 
-            // RestartPlayer 사용 - 이것이 레플리케이션을 올바르게 처리함
+            TSubclassOf<APawn> OriginalDefaultPawnClass = DefaultPawnClass;
+
+            ensureMsgf(KillerCharacterClass && CitizenCharacterClass, TEXT("KillerCharacterClass or CitizenCharacterClass has not been set."));
+
+            if (PC == KillerPlayerController)
+            {
+                DefaultPawnClass = KillerCharacterClass;
+            }
+            else
+            {
+                DefaultPawnClass = CitizenCharacterClass;
+            }
+
             // RestartPlayerAtTransform(PC, FTransform(SpawnLocation));
             RestartPlayerAtTransform(PC, FTransform(FVector(-100, 100, 120)));
+
+            DefaultPawnClass = OriginalDefaultPawnClass;
 
             UE_LOG(LogTemp, Log, TEXT("Teleported player %s to: (%f, %f, %f)"), *PC->GetName(), SpawnLocation.X, SpawnLocation.Y, SpawnLocation.Z);
 
