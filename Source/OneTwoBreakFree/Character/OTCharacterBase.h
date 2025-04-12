@@ -24,17 +24,6 @@ class ONETWOBREAKFREE_API AOTCharacterBase : public ACharacter
 public:
 	AOTCharacterBase(const FObjectInitializer& ObjectInitializer);
 
-protected:
-    virtual void BeginPlay() override;
-    virtual void PossessedBy(AController* NewController) override;
-    virtual void OnRep_Controller() override;
-    virtual void Tick(float DeltaTime) override;
-    virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
-    virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
-
-    UFUNCTION(BlueprintCallable)
-    void KickImpact();
-
     UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite, Category = "Character")
     EOTCharacterRole CharacterRole = EOTCharacterRole::ECR_None;
 
@@ -49,6 +38,17 @@ protected:
 
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Mesh")
     TObjectPtr<class USkeletalMeshComponent> FirstPersonMesh;
+
+protected:
+    virtual void BeginPlay() override;
+    virtual void PossessedBy(AController* NewController) override;
+    virtual void OnRep_Controller() override;
+    virtual void Tick(float DeltaTime) override;
+    virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+    virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
+
+    UFUNCTION(BlueprintCallable)
+    void KickImpact();
 
     UPROPERTY(Replicated, EditDefaultsOnly, BlueprintReadOnly, Category = "Stamina")
     float MaxStamina = 100.0f;
@@ -95,6 +95,11 @@ protected:
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Kick")
     TSubclassOf<class AGeometryCollectionActor> DestructibleWallClass;
 
+    UPROPERTY(ReplicatedUsing = OnRep_IsSprinting)
+    uint8 bIsSprinting : 1 = false;
+
+    uint8 bIsKicking : 1 = false;
+
 private:
     void Move(const FInputActionValue& Value);
     void Look(const FInputActionValue& Value);
@@ -104,6 +109,8 @@ private:
 
     void ConsumeStamina(float DeltaTime);
     void RegenerateStamina(float DeltaTime);
+
+    void SetupThirdPersonMesh();
 
     UFUNCTION(Server, Reliable)
     void ServerToggleSprint(bool bShouldSprint);
@@ -126,11 +133,6 @@ private:
 
     UFUNCTION()
     void OnRep_IsSprinting();
-
-    UPROPERTY(ReplicatedUsing = OnRep_IsSprinting)
-    uint8 bIsSprinting : 1 = false;
-
-    uint8 bIsKicking : 1 = false;
 
 public:
     FORCEINLINE EOTCharacterRole GetCharacterRole() const { return CharacterRole; }

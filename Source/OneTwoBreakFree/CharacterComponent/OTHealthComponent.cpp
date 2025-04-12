@@ -9,11 +9,11 @@ UOTHealthComponent::UOTHealthComponent()
 {
     PrimaryComponentTick.bCanEverTick = false;
 
+    SetIsReplicatedByDefault(true);
+
     MaxHealth = 100.0f;
     Health = MaxHealth;
     bIsDead = false;
-
-    SetIsReplicatedByDefault(true);
 }
 
 void UOTHealthComponent::BeginPlay()
@@ -48,45 +48,23 @@ void UOTHealthComponent::HandleTakeAnyDamage(AActor* DamagedActor, float Damage,
 
     Health = FMath::Clamp(Health - Damage, 0.0f, MaxHealth);
 
-    OnHealthChanged.Broadcast(this, Health, -Damage, DamageType);
+    OnHealthChanged.Broadcast(this, Health, -Damage);
 
     if (Health <= 0.0f && !bIsDead)
     {
         bIsDead = true;
 
-        OnDeath.Broadcast(this, GetOwner(), DamageCauser);
-
         MulticastOnDeath(DamageCauser);
     }
 }
 
-void UOTHealthComponent::HandleDeath(AActor* KillerActor)
+void UOTHealthComponent::OnRep_Health(float OldHealth)
 {
-    bIsDead = true;
-
-    // 게임모드를 통해, 플레이어 사망에 대한 GameState, PlayerState 처리. 
-
-    ACharacter* OwnerCharacter = Cast<ACharacter>(GetOwner());
-    if (OwnerCharacter)
-    {
-        if (OwnerCharacter->GetController())
-        {
-            OwnerCharacter->GetController()->UnPossess();
-        }
-
-        OwnerCharacter->SetLifeSpan(10.0f);
-    }
-
-    MulticastOnDeath(KillerActor);
+    float DeltaHealth = Health - OldHealth;
+    OnHealthChanged.Broadcast(this, Health, DeltaHealth);
 }
 
 void UOTHealthComponent::MulticastOnDeath_Implementation(AActor* KillerActor)
 {
-    if (Cast<ACharacter>(GetOwner()) && Cast<ACharacter>(GetOwner())->IsLocallyControlled())
-    {
-        // HUD
-    }
-
-    // 사망 애니메이션 재생
-    // 시각, 청각 부분 처리. 캐릭터에 대한 처리는 캐릭터에서 하며, 델리게이트를 통해 호출한다. 
+    OnDeath.Broadcast(this, GetOwner(), KillerActor);
 }

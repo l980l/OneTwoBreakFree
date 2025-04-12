@@ -30,12 +30,8 @@ AOTCharacterBase::AOTCharacterBase(const FObjectInitializer& ObjectInitializer)
 	GetCharacterMovement()->MaxWalkSpeed = WalkSpeed;
 	GetCharacterMovement()->bOrientRotationToMovement = false;
 	GetCharacterMovement()->RotationRate = FRotator(0.0f, 540.0f, 0.0f);
-	/*GetCharacterMovement()->bIgnoreClientMovementErrorChecksAndCorrection = true;
-	GetCharacterMovement()->bServerAcceptClientAuthoritativePosition = true;*/
-
-	GetCharacterMovement()->NetworkSmoothingMode = ENetworkSmoothingMode::Linear;
-	GetCharacterMovement()->NetworkMaxSmoothUpdateDistance = 0.0f; // 즉시 교정
-	GetCharacterMovement()->NetworkNoSmoothUpdateDistance = 0.0f;  // 스무딩 없이 즉시 교정
+	GetCharacterMovement()->bIgnoreClientMovementErrorChecksAndCorrection = true;
+	GetCharacterMovement()->bServerAcceptClientAuthoritativePosition = true;
 
 	bUseControllerRotationPitch = false;
 	bUseControllerRotationYaw = true;
@@ -95,7 +91,7 @@ void AOTCharacterBase::PossessedBy(AController* NewController)
 
 	if (IsLocallyControlled())
 	{
-		GetMesh()->HideBoneByName(FName("head"), EPhysBodyOp::PBO_None);
+		SetupThirdPersonMesh();
 	}
 }
 
@@ -103,7 +99,7 @@ void AOTCharacterBase::OnRep_Controller()
 {
 	Super::OnRep_Controller();
 
-	GetMesh()->HideBoneByName(FName("head"), EPhysBodyOp::PBO_None);
+	SetupThirdPersonMesh();
 }
 
 void AOTCharacterBase::Tick(float DeltaTime)
@@ -234,6 +230,15 @@ void AOTCharacterBase::RegenerateStamina(float DeltaTime)
 	}
 }
 
+void AOTCharacterBase::SetupThirdPersonMesh()
+{
+	GetMesh()->HideBoneByName(FName("head"), EPhysBodyOp::PBO_None);
+	GetMesh()->HideBoneByName(FName("upperarm_l"), EPhysBodyOp::PBO_None);
+	GetMesh()->HideBoneByName(FName("hand_l"), EPhysBodyOp::PBO_None);
+	GetMesh()->HideBoneByName(FName("upperarm_r"), EPhysBodyOp::PBO_None);
+	GetMesh()->HideBoneByName(FName("hand_r"), EPhysBodyOp::PBO_None);
+}
+
 void AOTCharacterBase::ServerToggleSprint_Implementation(bool bShouldSprint)
 {
 	if (bShouldSprint && (Stamina > MinStaminaToSprint))
@@ -285,7 +290,6 @@ void AOTCharacterBase::MulticastKick_Implementation()
 		AnimInstance->Montage_SetEndDelegate(EndDelegate, ThirdPersonKickMontage);
 
 		GetMesh()->SetOwnerNoSee(false);
-		FirstPersonMesh->SetOwnerNoSee(true);
 	}
 
 	GetCharacterMovement()->MovementMode = EMovementMode::MOVE_None;
@@ -297,7 +301,6 @@ void AOTCharacterBase::OnKickMontageEnded(UAnimMontage* Montage, bool bInterrupt
 	{
 		bIsKicking = false;
 		GetMesh()->SetOwnerNoSee(true);
-		FirstPersonMesh->SetOwnerNoSee(false);
 	}
 
 	GetCharacterMovement()->MovementMode = EMovementMode::MOVE_Walking;
@@ -370,9 +373,9 @@ void AOTCharacterBase::TriggerWallDestruction(FVector_NetQuantize ImpactPoint, F
 
 					GetWorld()->GetTimerManager().SetTimer(BreakTimerHandle, [GeoComp, ImpactPoint, WallLocation]()
 						{
-						FVector ImpactDirection = (ImpactPoint - WallLocation).GetSafeNormal();
-						GeoComp->AddImpulseAtLocation(ImpactDirection * 1000000.0f, ImpactPoint);
-
+							const float ForceMultiplier = 1000000.0f;
+							FVector ImpactDirection = (ImpactPoint - WallLocation).GetSafeNormal();
+							GeoComp->AddImpulseAtLocation(ImpactDirection * ForceMultiplier, ImpactPoint);
 						}, 0.1f, false);
 
 					FTimerHandle DestroyTimerHandle;

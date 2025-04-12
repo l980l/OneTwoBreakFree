@@ -24,7 +24,7 @@ protected:
 
 protected:
     UFUNCTION()
-    virtual void OnHealthChanged(class UOTHealthComponent* HealthComp, float Health, float HealthDelta, const class UDamageType* DamageType);
+    virtual void OnHealthChanged(class UOTHealthComponent* HealthComp, float Health, float HealthDelta);
 
     UFUNCTION()
     virtual void OnCharacterDeath(class UOTHealthComponent* HealthComp, AActor* KilledActor, AActor* KillerActor);

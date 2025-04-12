@@ -26,7 +26,7 @@ void AOTCitizenCharacter::BeginPlay()
 	}
 }
 
-void AOTCitizenCharacter::OnHealthChanged(UOTHealthComponent* HealthComp, float Health, float HealthDelta, const UDamageType* DamageType)
+void AOTCitizenCharacter::OnHealthChanged(UOTHealthComponent* HealthComp, float Health, float HealthDelta)
 {
 	// 체력 변화시 실행될 로직
 	// 여기서는 아무것도 하지 않지만 필요에 따라 확장 가능
@@ -41,6 +41,11 @@ void AOTCitizenCharacter::OnHealthChanged(UOTHealthComponent* HealthComp, float 
 
 void AOTCitizenCharacter::OnCharacterDeath(UOTHealthComponent* HealthComp, AActor* KilledActor, AActor* KillerActor)
 {
+	if (Cast<ACharacter>(GetOwner()) && Cast<ACharacter>(GetOwner())->IsLocallyControlled())
+	{
+		// 사망 HUD
+	}
+
 	// 캐릭터가 죽었을 때 실행될 로직
 	// 이동 기능 비활성화
 	GetCharacterMovement()->DisableMovement();
