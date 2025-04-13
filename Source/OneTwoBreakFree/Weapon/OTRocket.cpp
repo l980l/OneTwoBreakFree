@@ -102,25 +102,7 @@ void AOTRocket::MulticastExplosionEffects_Implementation(const FVector& Location
 	{
 		UGameplayStatics::PlaySoundAtLocation(this, ExplosionSound, Location);
 	}
-
-	APawn* LocalPawn = UGameplayStatics::GetPlayerPawn(this, 0);
-	if (LocalPawn)
-	{
-		APlayerController* PC = Cast<APlayerController>(LocalPawn->GetController());
-		if (PC)
-		{
-			// 거리에 따른 카메라 흔들림 강도 계산
-			const float Distance = FVector::Dist(Location, LocalPawn->GetActorLocation());
-			const float ShakeScale = FMath::Clamp(1.0f - (Distance / ExplosionRadius), 0.0f, 1.0f);
-
-			if (ShakeScale > 0.0f)
-			{
-				PC->ClientStartCameraShake(FireCameraShake, ShakeScale * 5.0f);
-			}
-		}
-	}
 }
-
 
 void AOTRocket::TriggerWallDestruction(const FVector& ImpactPoint)
 {
@@ -138,7 +120,6 @@ void AOTRocket::TriggerWallDestruction(const FVector& ImpactPoint)
             OverlappingActors
         );
 
-        // DestructibleWallClass가 설정되어 있는지 확인
         if (!DestructibleWallClass)
         {
             UE_LOG(LogTemp, Warning, TEXT("DestructibleWallClass is not set in Rocket"));
@@ -195,11 +176,9 @@ void AOTRocket::MulticastTriggerWallDestruction_Implementation(const FVector& Im
             const FVector WallLocation = WallActor->GetActorLocation();
             const FRotator WallRotation = WallActor->GetActorRotation();
 
-            // 원래 벽을 숨기고 충돌 비활성화
             WallActor->SetActorHiddenInGame(true);
             WallActor->SetActorEnableCollision(false);
 
-            // 파괴 가능한 벽으로 교체
             FActorSpawnParameters SpawnParams;
             AGeometryCollectionActor* DestructibleWall = GetWorld()->SpawnActor<AGeometryCollectionActor>(
                 DestructibleWallClass,
@@ -226,7 +205,7 @@ void AOTRocket::MulticastTriggerWallDestruction_Implementation(const FVector& Im
                             const float ForceMultiplier = 2000000.0f;
                             GeoComp->AddImpulseAtLocation(ImpactDirection * ForceMultiplier, ImpactPoint);
                         },
-                        0.1f,
+                        0.3f,
                         false
                     );
 

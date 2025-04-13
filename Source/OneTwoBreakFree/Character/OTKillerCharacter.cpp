@@ -8,6 +8,8 @@
 #include "OTCharacterMovementComponent.h"
 #include "OneTwoBreakFree/CharacterComponent/OTWeaponComponent.h"
 #include "OneTwoBreakFree/Weapon/OTWeapon.h"
+#include "OneTwoBreakFree/PlayerController/OTPlayerController.h"
+#include "OneTwoBreakFree/GameState/OTMatchGameState.h"
 
 AOTKillerCharacter::AOTKillerCharacter(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer.SetDefaultSubobjectClass<UOTCharacterMovementComponent>(ACharacter::CharacterMovementComponentName))
@@ -39,10 +41,44 @@ void AOTKillerCharacter::BeginPlay()
 			SecondaryWeapon = GetWorld()->SpawnActor<AOTWeapon>(SecondaryWeaponClass, FTransform(), SpawnParams);
 		}
 
-		// 무기 컴포넌트에 무기 설정
 		if (WeaponComponent && PrimaryWeapon && SecondaryWeapon)
 		{
 			WeaponComponent->SetupWeapons(PrimaryWeapon, SecondaryWeapon);
+		}
+	}
+}
+
+void AOTKillerCharacter::PossessedBy(AController* NewController)
+{
+	Super::PossessedBy(NewController);
+
+	if (IsLocallyControlled())
+	{
+		GetWorldTimerManager().SetTimer(SetupHUDTimerHandle, this, &AOTKillerCharacter::CheckHUDAndSetupUI, 0.1f, true);
+	}
+}
+
+void AOTKillerCharacter::OnRep_Controller()
+{
+	Super::OnRep_Controller();
+
+	if (IsLocallyControlled())
+	{
+		GetWorldTimerManager().SetTimer(SetupHUDTimerHandle, this, &AOTKillerCharacter::CheckHUDAndSetupUI, 0.1f, true);
+	}
+}
+
+void AOTKillerCharacter::CheckHUDAndSetupUI()
+{
+	if (AOTPlayerController* PC = Cast<AOTPlayerController>(Controller))
+	{
+		if (PC->GetHUD())
+		{
+			PC->SetupKillerWidget();
+			PC->SetHUDHealthMarquee(true);
+			WeaponComponent->SetWeaponOwnerPlayerController(PC);
+
+			GetWorldTimerManager().ClearTimer(SetupHUDTimerHandle);
 		}
 	}
 }

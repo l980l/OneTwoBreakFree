@@ -35,6 +35,10 @@ public:
 	void PlaySound(EWeaponSoundType SoundType);
 	
 protected:
+	void SetOwnerPlayerController(class AOTPlayerController* NewPlayerController);
+	
+	TObjectPtr<class AOTPlayerController> OwnerPlayerController;
+
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 	TObjectPtr<USkeletalMeshComponent> WeaponMesh;
 

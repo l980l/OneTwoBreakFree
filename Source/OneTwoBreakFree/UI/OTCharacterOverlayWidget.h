@@ -33,10 +33,27 @@ public:
 	UPROPERTY(Transient, BlueprintReadWrite, meta = (BindWidgetAnim))
 	TObjectPtr<UWidgetAnimation> FadeOutAnimation;
 
+	// Å³·¯
+	UPROPERTY(meta = (BindWidget))
+	TObjectPtr<UTextBlock> RifleText;
+
+	UPROPERTY(meta = (BindWidget))
+	TObjectPtr<UTextBlock> BazookaText;
+
+	UPROPERTY(meta = (BindWidget))
+	TObjectPtr<UTextBlock> RifleAmmoText;
+
+	UPROPERTY(meta = (BindWidget))
+	TObjectPtr<UProgressBar> BazookaCooltimeProgress;
+
 public:
 	void SetHealthPercent(float HealthPercent);
+	void SetHealthMarquee(bool bMarquee);
 	void SetStaminaPercent(float StaminaPercent);
 	void ShowStaminaWidget(bool bShow);
 	void SetMatchTimeText(int32 Minutes, int32 Seconds);
 	void SetMatchTimeFromSeconds(float TotalSeconds);
+	void SetupKillerWidget();
+	void SetRifleAmmo(int32 CurrentAmmo, int32 MaxAmmo);
+	void SetBazookaPercent(float BazookaPercent);
 };

@@ -23,6 +23,7 @@ public:
 	void Fire();
 	void Reload();
 	void SwapWeapon();
+	void SetWeaponOwnerPlayerController(class AOTPlayerController* NewPlayerController);
 
 	UFUNCTION(BlueprintCallable, Category = "Weapon")
 	void SetupWeapons(AOTWeapon* PrimaryWeapon, AOTWeapon* SecondaryWeapon);

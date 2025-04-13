@@ -6,6 +6,8 @@
 #include "OTCharacterBase.h"
 #include "OTKillerCharacter.generated.h"
 
+class UInputMappingContext;
+class UInputAction;
 class UOTWeaponComponent;
 class AOTWeapon;
 
@@ -25,29 +27,33 @@ public:
 
 protected:
 	virtual void BeginPlay() override;
+	virtual void PossessedBy(AController* NewController) override;
+	virtual void OnRep_Controller() override;
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
+	void CheckHUDAndSetupUI();
 	void StartFire();
 	void StartReload();
 	void StartSwapWeapon();
 
-	// 메인 무기 클래스
 	UPROPERTY(EditDefaultsOnly, Category = "Weapon")
 	TSubclassOf<AOTWeapon> PrimaryWeaponClass;
 
-	// 보조 무기 클래스
 	UPROPERTY(EditDefaultsOnly, Category = "Weapon")
 	TSubclassOf<AOTWeapon> SecondaryWeaponClass;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Input")
-	TObjectPtr<class UInputAction> FireAction;
+	TObjectPtr<UInputAction> FireAction;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Input")
-	TObjectPtr<class UInputAction> ReloadAction;
+	TObjectPtr<UInputAction> ReloadAction;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Input")
-	TObjectPtr<class UInputAction> SwapAction;
+	TObjectPtr<UInputAction> SwapAction;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Input")
-	TObjectPtr<class UInputMappingContext> WeaponMappingContext;
+	TObjectPtr<UInputMappingContext> WeaponMappingContext;
+
+private:
+	FTimerHandle SetupHUDTimerHandle;
 };

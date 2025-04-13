@@ -4,8 +4,9 @@
 #include "OTBazooka.h"
 #include "Kismet/GameplayStatics.h"
 #include "Net/UnrealNetwork.h"
-#include "GameFramework/Character.h"
 #include "OTRocket.h"
+#include "GameFramework/Character.h"
+#include "OneTwoBreakFree/PlayerController/OTPlayerController.h"
 
 AOTBazooka::AOTBazooka()
 {
@@ -44,6 +45,18 @@ void AOTBazooka::Tick(float DeltaTime)
             OnCooldownComplete();
         }
     }
+
+    if (OwnerPlayerController)
+    {
+        if (!bIsOnCooldown)
+        {
+            OwnerPlayerController->SetHUDBazookaPercent(1.f);
+        }
+        else
+        {
+            OwnerPlayerController->SetHUDBazookaPercent((Cooldown - CooldownRemaining) / Cooldown);
+        }
+    }
 }
 
 void AOTBazooka::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
@@ -60,7 +73,6 @@ void AOTBazooka::Fire()
 {
     if (!bCanFire || CurrentAmmo <= 0)
     {
-        // 빈 발사 소리 재생
         return;
     }
 
@@ -70,7 +82,6 @@ void AOTBazooka::Fire()
     }
     MulticastFireEffects();
 
-    // 서버에서 실제 발사 처리
     if (GetLocalRole() == ROLE_Authority)
     {
         --CurrentAmmo;
@@ -80,29 +91,6 @@ void AOTBazooka::Fire()
         bCanFire = false;
         bIsOnCooldown = true;
         CooldownRemaining = Cooldown;
-
-        if (CurrentAmmo <= 0)
-        {
-            // 쿨다운 타이머 시작 (쿨다운 완료 후 1발 충전)
-            GetWorld()->GetTimerManager().SetTimer(
-                CooldownTimerHandle,
-                this,
-                &AOTBazooka::OnCooldownComplete,
-                Cooldown,
-                false
-            );
-        }
-        else
-        {
-            // 발사 딜레이 후 다시 발사 가능하게 설정
-            FTimerHandle FireDelayHandle;
-            GetWorld()->GetTimerManager().SetTimer(
-                FireDelayHandle,
-                [this]() { bCanFire = true; },
-                0.5f,  // 발사 딜레이
-                false
-            );
-        }
     }
 }
 
@@ -173,11 +161,6 @@ void AOTBazooka::OnCooldownComplete()
     CurrentAmmo = FMath::Min(MaxAmmo, CurrentAmmo + 1);
 
     bCanFire = true;
-}
-
-void AOTBazooka::OnRep_CooldownRemaining()
-{
-    // 쿨다운 UI 업데이트
 }
 
 void AOTBazooka::PlayFireEffects()

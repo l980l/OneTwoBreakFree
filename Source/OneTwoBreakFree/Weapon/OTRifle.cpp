@@ -6,11 +6,10 @@
 #include "GameFramework/Character.h"
 #include "Kismet/GameplayStatics.h"
 #include "Particles/ParticleSystemComponent.h"
+#include "OneTwoBreakFree/PlayerController/OTPlayerController.h"
 
 AOTRifle::AOTRifle()
 {
-    bReplicates = true;
-
     MuzzleSocketName = "MuzzleFlash";
     MagazineCapacity = 8;
     CurrentAmmo = MagazineCapacity;
@@ -64,6 +63,8 @@ void AOTRifle::Fire()
 
             --CurrentAmmo;
 
+            SetAmmoWidget();
+
             if (CurrentAmmo <= 0)
             {
                 Reload();
@@ -115,6 +116,7 @@ void AOTRifle::Reload()
             {
                 CurrentAmmo = MagazineCapacity;
                 bIsReloading = false;
+                SetAmmoWidget();
             },
             ReloadTime,
             false
@@ -228,4 +230,17 @@ void AOTRifle::PlayFireEffects()
             PC->ClientStartCameraShake(FireCameraShake, 1.f);
         }
     }
+}
+
+void AOTRifle::SetAmmoWidget()
+{
+    if (OwnerPlayerController)
+    {
+        OwnerPlayerController->SetHUDRifleAmmo(CurrentAmmo, MagazineCapacity);
+    }
+}
+
+void AOTRifle::OnRep_CurrentAmmo()
+{
+    SetAmmoWidget();
 }

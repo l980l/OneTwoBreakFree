@@ -3,6 +3,8 @@
 
 #include "OTWeapon.h"
 #include "Kismet/GameplayStatics.h"
+#include "GameFramework/Character.h"
+#include "OneTwoBreakFree/PlayerController/OTPlayerController.h"
 
 AOTWeapon::AOTWeapon()
 {
@@ -55,5 +57,13 @@ void AOTWeapon::PlaySound(EWeaponSoundType SoundType)
 	if (Sound)
 	{
 		UGameplayStatics::PlaySoundAtLocation(this, Sound, GetActorLocation());
+	}
+}
+
+void AOTWeapon::SetOwnerPlayerController(AOTPlayerController* NewPlayerController)
+{
+	if (NewPlayerController)
+	{
+		OwnerPlayerController = NewPlayerController;
 	}
 }

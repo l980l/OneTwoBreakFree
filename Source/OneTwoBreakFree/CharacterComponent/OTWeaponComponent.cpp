@@ -267,6 +267,14 @@ void UOTWeaponComponent::SwapWeapon()
 	}
 }
 
+void UOTWeaponComponent::SetWeaponOwnerPlayerController(AOTPlayerController* NewPlayerController)
+{
+	for (int i = 0; i < Weapons.Num(); ++i)
+	{
+		Weapons[i]->SetOwnerPlayerController(NewPlayerController);
+	}
+}
+
 void UOTWeaponComponent::ServerSwapWeapon_Implementation()
 {
 	if (bIsSwapping)

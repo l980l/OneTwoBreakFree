@@ -34,6 +34,16 @@ void AOTPlayerController::SetHUDHealth(float HealthPercent)
     }
 }
 
+void AOTPlayerController::SetHUDHealthMarquee(bool bMarquee)
+{
+    if (!OTHUD)
+        OTHUD = Cast<AOTHUD>(GetHUD());
+    if (OTHUD && OTHUD->CharacterOverlay)
+    {
+        OTHUD->CharacterOverlay->SetHealthMarquee(bMarquee);
+    }
+}
+
 void AOTPlayerController::SetHUDStamina(float StaminaPercent)
 {
     if (!OTHUD)
@@ -71,6 +81,36 @@ void AOTPlayerController::SetHUDMatchTimeFromSeconds(float TotalSeconds)
     if (OTHUD && OTHUD->CharacterOverlay)
     {
         OTHUD->CharacterOverlay->SetMatchTimeFromSeconds(TotalSeconds);
+    }
+}
+
+void AOTPlayerController::SetupKillerWidget()
+{
+    if (!OTHUD)
+        OTHUD = Cast<AOTHUD>(GetHUD());
+    if (OTHUD && OTHUD->CharacterOverlay)
+    {
+        OTHUD->CharacterOverlay->SetupKillerWidget();
+    }
+}
+
+void AOTPlayerController::SetHUDRifleAmmo(int32 CurrentAmmo, int32 MaxAmmo)
+{
+    if (!OTHUD)
+        OTHUD = Cast<AOTHUD>(GetHUD());
+    if (OTHUD && OTHUD->CharacterOverlay)
+    {
+        OTHUD->CharacterOverlay->SetRifleAmmo(CurrentAmmo, MaxAmmo);
+    }
+}
+
+void AOTPlayerController::SetHUDBazookaPercent(float BazookaPercent)
+{
+    if (!OTHUD)
+        OTHUD = Cast<AOTHUD>(GetHUD());
+    if (OTHUD && OTHUD->CharacterOverlay)
+    {
+        OTHUD->CharacterOverlay->SetBazookaPercent(BazookaPercent);
     }
 }
 

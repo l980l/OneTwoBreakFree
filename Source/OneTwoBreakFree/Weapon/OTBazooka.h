@@ -35,9 +35,6 @@ private:
 	UFUNCTION()
 	void OnCooldownComplete();
 
-	UFUNCTION()
-	void OnRep_CooldownRemaining();
-
 	void PlayFireEffects();
 
 protected:
@@ -66,7 +63,7 @@ protected:
 	float Cooldown;
 
 	// 남은 쿨타임 (초)
-	UPROPERTY(ReplicatedUsing = OnRep_CooldownRemaining, BlueprintReadOnly, Category = "Weapon")
+	UPROPERTY(Replicated, BlueprintReadOnly, Category = "Weapon")
 	float CooldownRemaining;
 
 	// 쿨타임 타이머 핸들

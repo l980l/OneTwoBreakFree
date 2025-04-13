@@ -34,8 +34,12 @@ private:
 
 	void FireLineTrace();
 	void PlayFireEffects();
+	void SetAmmoWidget();
 
 protected:
+	UFUNCTION()
+	void OnRep_CurrentAmmo();
+
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Weapon")
 	FName MuzzleSocketName;
 
@@ -48,7 +52,7 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Weapon")
 	int32 MagazineCapacity;
 
-	UPROPERTY(Replicated, BlueprintReadOnly, Category = "Weapon")
+	UPROPERTY(ReplicatedUsing = OnRep_CurrentAmmo, BlueprintReadOnly, Category = "Weapon")
 	int32 CurrentAmmo;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Weapon")

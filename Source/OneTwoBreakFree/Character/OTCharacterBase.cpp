@@ -376,7 +376,7 @@ void AOTCharacterBase::TriggerWallDestruction(FVector_NetQuantize ImpactPoint, F
 							const float ForceMultiplier = 1000000.0f;
 							FVector ImpactDirection = (ImpactPoint - WallLocation).GetSafeNormal();
 							GeoComp->AddImpulseAtLocation(ImpactDirection * ForceMultiplier, ImpactPoint);
-						}, 0.1f, false);
+						}, 0.3f, false);
 
 					FTimerHandle DestroyTimerHandle;
 					FTimerDelegate DestroyDelegate;

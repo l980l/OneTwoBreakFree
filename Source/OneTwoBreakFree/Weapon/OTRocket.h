@@ -56,9 +56,6 @@ protected:
 	UPROPERTY(EditDefaultsOnly, Category = "Sound")
 	TObjectPtr<USoundBase> ExplosionSound;
 
-	UPROPERTY(EditDefaultsOnly, Category = "Effects")
-	TSubclassOf<class UCameraShakeBase> FireCameraShake;
-
 	UPROPERTY(EditDefaultsOnly, Category = "Projectile")
 	float Damage;
 

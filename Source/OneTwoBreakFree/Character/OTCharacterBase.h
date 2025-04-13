@@ -95,6 +95,9 @@ protected:
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Kick")
     TSubclassOf<class AGeometryCollectionActor> DestructibleWallClass;
 
+    UPROPERTY(EditDefaultsOnly, Category = "Effects")
+    TSubclassOf<class UCameraShakeBase> FireCameraShake;
+
     UPROPERTY(ReplicatedUsing = OnRep_IsSprinting)
     uint8 bIsSprinting : 1 = false;
 
