@@ -92,6 +92,9 @@ protected:
     UPROPERTY(EditDefaultsOnly, Category = "Animation")
     TObjectPtr<class UAnimMontage> ThirdPersonKickMontage;
 
+    UPROPERTY(EditDefaultsOnly, Category = "Animation")
+    TObjectPtr<class UAnimMontage> FirstPersonKickMontage;
+
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Kick")
     TSubclassOf<class AGeometryCollectionActor> DestructibleWallClass;
 

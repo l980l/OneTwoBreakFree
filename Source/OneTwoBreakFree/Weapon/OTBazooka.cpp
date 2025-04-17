@@ -84,6 +84,7 @@ void AOTBazooka::Fire()
 
     if (GetLocalRole() == ROLE_Authority)
     {
+        OnWeaponFire.Broadcast();
         --CurrentAmmo;
 
         ServerFireProjectile();
@@ -175,7 +176,7 @@ void AOTBazooka::PlayFireEffects()
             const FTransform MuzzleTransform = WeaponSkeletalMesh->GetSocketTransform(MuzzleSocketName);
             UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), MuzzleFlash, MuzzleTransform);
         }
-        if (FirstPersonWeaponMesh)
+        if (FirstPersonWeaponMesh && Cast<ACharacter>(GetOwner())->IsLocallyControlled())
         {
             const FTransform MuzzleTransform = FirstPersonWeaponMesh->GetSocketTransform(MuzzleSocketName);
             UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), MuzzleFlash, MuzzleTransform);
@@ -188,7 +189,7 @@ void AOTBazooka::PlayFireEffects()
         APlayerController* PC = Cast<APlayerController>(OwningPawn->GetController());
         if (PC)
         {
-            PC->ClientStartCameraShake(FireCameraShake, 2.f);
+            PC->ClientStartCameraShake(FireCameraShake, 10.f);
         }
     }
 }

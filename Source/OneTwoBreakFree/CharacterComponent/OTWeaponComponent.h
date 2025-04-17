@@ -6,6 +6,8 @@
 #include "Components/ActorComponent.h"
 #include "OTWeaponComponent.generated.h"
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnWeaponSwapDelegate);
+
 class AOTWeapon;
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
@@ -23,7 +25,7 @@ public:
 	void Fire();
 	void Reload();
 	void SwapWeapon();
-	void SetWeaponOwnerPlayerController(class AOTPlayerController* NewPlayerController);
+	bool SetWeaponOwnerPlayerController(class AOTPlayerController* NewPlayerController);
 
 	UFUNCTION(BlueprintCallable, Category = "Weapon")
 	void SetupWeapons(AOTWeapon* PrimaryWeapon, AOTWeapon* SecondaryWeapon);
@@ -33,6 +35,9 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "Weapon")
 	int32 GetCurrentWeaponIndex() const { return CurrentWeaponIndex; }
+
+	UPROPERTY(BlueprintAssignable, Category = "Weapon|Events")
+	FOnWeaponSwapDelegate OnWeaponSwap;
 
 protected:
 	void SetupFirstPersonWeaponMeshes();

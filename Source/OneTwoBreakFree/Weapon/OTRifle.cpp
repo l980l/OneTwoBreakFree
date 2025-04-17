@@ -57,6 +57,7 @@ void AOTRifle::Fire()
 
         if (GetLocalRole() == ROLE_Authority)
         {
+            OnWeaponFire.Broadcast();
             MulticastFireEffects();
 
             FireLineTrace();
@@ -103,11 +104,9 @@ void AOTRifle::Reload()
 
     PlaySound(EWeaponSoundType::Reload);
 
-    // 재장전 애니메이션 처리 (옵션)
-    // ...
-
     if (GetLocalRole() == ROLE_Authority)
     {
+        OnWeaponReload.Broadcast();
         bIsReloading = true;
 
         GetWorld()->GetTimerManager().SetTimer(
@@ -139,6 +138,18 @@ void AOTRifle::MulticastImpactEffects_Implementation(FVector_NetQuantize ImpactP
     if (ImpactEffect)
     {
         UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), ImpactEffect, ImpactPoint, ImpactNormal.Rotation());
+    }
+}
+
+void AOTRifle::ClientFlashCrosshairRed_Implementation()
+{
+    if (OwnerPlayerController)
+    {
+        AOTPlayerController* PC = Cast<AOTPlayerController>(OwnerPlayerController);
+        if (PC)
+        {
+            PC->FlashCrosshairRed();
+        }
     }
 }
 
@@ -182,7 +193,7 @@ void AOTRifle::FireLineTrace()
         AActor* HitActor = Hit.GetActor();
 
         // 데미지 적용
-        if (HitActor)
+        if (HitActor && HitActor->ActorHasTag("Player"))
         {
             UGameplayStatics::ApplyPointDamage(
                 HitActor,                       
@@ -193,6 +204,8 @@ void AOTRifle::FireLineTrace()
                 this,                          
                 nullptr                        
             );
+        
+            ClientFlashCrosshairRed();
         }
 
         MulticastImpactEffects(Hit.ImpactPoint, Hit.ImpactNormal);
@@ -209,7 +222,7 @@ void AOTRifle::PlayFireEffects()
             const FTransform MuzzleTransform = WeaponSkeletalMesh->GetSocketTransform(MuzzleSocketName);
             UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), MuzzleFlash, MuzzleTransform);
         }
-        if (FirstPersonWeaponMesh)
+        if (FirstPersonWeaponMesh && Cast<ACharacter>(GetOwner())->IsLocallyControlled())
         {
             const FTransform MuzzleTransform = FirstPersonWeaponMesh->GetSocketTransform(MuzzleSocketName);
             UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), MuzzleFlash, MuzzleTransform);
@@ -227,7 +240,7 @@ void AOTRifle::PlayFireEffects()
         APlayerController* PC = Cast<APlayerController>(OwningPawn->GetController());
         if (PC)
         {
-            PC->ClientStartCameraShake(FireCameraShake, 1.f);
+            PC->ClientStartCameraShake(FireCameraShake, 5.f);
         }
     }
 }

@@ -27,6 +27,7 @@ public:
     void SetupKillerWidget();
     void SetHUDRifleAmmo(int32 CurrentAmmo, int32 MaxAmmo);
     void SetHUDBazookaPercent(float BazookaPercent);
+    void FlashCrosshairRed();
     
     UPROPERTY(ReplicatedUsing = OnRep_MatchState)
     FName MatchState;

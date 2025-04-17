@@ -44,6 +44,11 @@ void AOTKillerCharacter::BeginPlay()
 		if (WeaponComponent && PrimaryWeapon && SecondaryWeapon)
 		{
 			WeaponComponent->SetupWeapons(PrimaryWeapon, SecondaryWeapon);
+			WeaponComponent->OnWeaponSwap.AddDynamic(this, &AOTKillerCharacter::PlaySwapMontage);
+			PrimaryWeapon->OnWeaponFire.AddDynamic(this, &AOTKillerCharacter::PlayFireMontage);
+			PrimaryWeapon->OnWeaponReload.AddDynamic(this, &AOTKillerCharacter::PlayReloadMontage);
+			SecondaryWeapon->OnWeaponFire.AddDynamic(this, &AOTKillerCharacter::PlayFireMontage);
+			SecondaryWeapon->OnWeaponReload.AddDynamic(this, &AOTKillerCharacter::PlayReloadMontage);
 		}
 	}
 }
@@ -54,7 +59,7 @@ void AOTKillerCharacter::PossessedBy(AController* NewController)
 
 	if (IsLocallyControlled())
 	{
-		GetWorldTimerManager().SetTimer(SetupHUDTimerHandle, this, &AOTKillerCharacter::CheckHUDAndSetupUI, 0.1f, true);
+		GetWorldTimerManager().SetTimer(SetupHUDTimerHandle, this, &AOTKillerCharacter::CheckAndSetup, 0.1f, true);
 	}
 }
 
@@ -64,20 +69,18 @@ void AOTKillerCharacter::OnRep_Controller()
 
 	if (IsLocallyControlled())
 	{
-		GetWorldTimerManager().SetTimer(SetupHUDTimerHandle, this, &AOTKillerCharacter::CheckHUDAndSetupUI, 0.1f, true);
+		GetWorldTimerManager().SetTimer(SetupHUDTimerHandle, this, &AOTKillerCharacter::CheckAndSetup, 0.1f, true);
 	}
 }
 
-void AOTKillerCharacter::CheckHUDAndSetupUI()
+void AOTKillerCharacter::CheckAndSetup()
 {
 	if (AOTPlayerController* PC = Cast<AOTPlayerController>(Controller))
 	{
-		if (PC->GetHUD())
+		if (WeaponComponent->SetWeaponOwnerPlayerController(PC) && PC->GetHUD())
 		{
 			PC->SetupKillerWidget();
 			PC->SetHUDHealthMarquee(true);
-			WeaponComponent->SetWeaponOwnerPlayerController(PC);
-
 			GetWorldTimerManager().ClearTimer(SetupHUDTimerHandle);
 		}
 	}
@@ -103,6 +106,21 @@ void AOTKillerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputC
 			Subsystem->AddMappingContext(WeaponMappingContext, 1);
 		}
 	}
+}
+
+void AOTKillerCharacter::PlayFireMontage()
+{
+	MulticastPlayFireMontage();
+}
+
+void AOTKillerCharacter::PlayReloadMontage()
+{
+	MulticastPlayReloadMontage();
+}
+
+void AOTKillerCharacter::PlaySwapMontage()
+{
+	MulticastPlaySwapMontage();
 }
 
 void AOTKillerCharacter::StartFire()
@@ -135,5 +153,77 @@ void AOTKillerCharacter::StartSwapWeapon()
 	if (WeaponComponent)
 	{
 		WeaponComponent->SwapWeapon();
+	}
+}
+
+void AOTKillerCharacter::MulticastPlayFireMontage_Implementation()
+{
+	if (IsLocallyControlled())
+	{
+		if (FireMontage_FP)
+		{
+			UAnimInstance* AnimInstance = FirstPersonMesh->GetAnimInstance();
+			if (AnimInstance)
+			{
+				AnimInstance->Montage_Play(FireMontage_FP);
+			}
+		}
+	}
+
+	else if (FireMontage_TP)
+	{
+		UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+		if (AnimInstance)
+		{
+			AnimInstance->Montage_Play(FireMontage_TP);
+		}
+	}
+}
+
+void AOTKillerCharacter::MulticastPlayReloadMontage_Implementation()
+{
+	if (IsLocallyControlled())
+	{
+		if (ReloadMontage_FP)
+		{
+			UAnimInstance* AnimInstance = FirstPersonMesh->GetAnimInstance();
+			if (AnimInstance)
+			{
+				AnimInstance->Montage_Play(ReloadMontage_FP);
+			}
+		}
+	}
+
+	else if (ReloadMontage_TP)
+	{
+		UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+		if (AnimInstance)
+		{
+			AnimInstance->Montage_Play(ReloadMontage_TP);
+		}
+	}
+}
+
+void AOTKillerCharacter::MulticastPlaySwapMontage_Implementation()
+{
+	if (IsLocallyControlled())
+	{
+		if (SwapMontage_FP)
+		{
+			UAnimInstance* AnimInstance = FirstPersonMesh->GetAnimInstance();
+			if (AnimInstance)
+			{
+				AnimInstance->Montage_Play(SwapMontage_FP);
+			}
+		}
+	}
+
+	else if (SwapMontage_TP)
+	{
+		UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+		if (AnimInstance)
+		{
+			AnimInstance->Montage_Play(SwapMontage_TP);
+		}
 	}
 }

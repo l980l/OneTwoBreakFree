@@ -205,7 +205,7 @@ void AOTRocket::MulticastTriggerWallDestruction_Implementation(const FVector& Im
                             const float ForceMultiplier = 2000000.0f;
                             GeoComp->AddImpulseAtLocation(ImpactDirection * ForceMultiplier, ImpactPoint);
                         },
-                        0.3f,
+                        0.1f,
                         false
                     );
 

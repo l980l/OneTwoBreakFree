@@ -114,6 +114,16 @@ void AOTPlayerController::SetHUDBazookaPercent(float BazookaPercent)
     }
 }
 
+void AOTPlayerController::FlashCrosshairRed()
+{
+    if (!OTHUD)
+        OTHUD = Cast<AOTHUD>(GetHUD());
+    if (OTHUD && OTHUD->CharacterOverlay)
+    {
+        OTHUD->CharacterOverlay->FlashCrosshairRed();
+    }
+}
+
 void AOTPlayerController::OnMatchStateSet(FName State)
 {
     MatchState = State;

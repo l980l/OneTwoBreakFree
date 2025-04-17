@@ -32,6 +32,9 @@ private:
 	UFUNCTION(NetMulticast, Unreliable)
 	void MulticastImpactEffects(FVector_NetQuantize ImpactPoint, FVector_NetQuantize ImpactNormal);
 
+	UFUNCTION(Client, Unreliable)
+	void ClientFlashCrosshairRed();
+
 	void FireLineTrace();
 	void PlayFireEffects();
 	void SetAmmoWidget();

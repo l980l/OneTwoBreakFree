@@ -6,6 +6,9 @@
 #include "GameFramework/Actor.h"
 #include "OTWeapon.generated.h"
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnWeaponFireDelegate);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnWeaponReloadDelegate);
+
 UENUM()
 enum class EWeaponSoundType : uint8
 {
@@ -14,7 +17,6 @@ enum class EWeaponSoundType : uint8
 	Equip,
 	Max
 };
-
 
 UCLASS()
 class ONETWOBREAKFREE_API AOTWeapon : public AActor
@@ -33,7 +35,13 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "Weapon")
 	void PlaySound(EWeaponSoundType SoundType);
-	
+
+	UPROPERTY(BlueprintAssignable, Category = "Weapon|Events")
+	FOnWeaponFireDelegate OnWeaponFire;
+
+	UPROPERTY(BlueprintAssignable, Category = "Weapon|Events")
+	FOnWeaponReloadDelegate OnWeaponReload;
+
 protected:
 	void SetOwnerPlayerController(class AOTPlayerController* NewPlayerController);
 	

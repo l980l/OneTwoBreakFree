@@ -64,8 +64,6 @@ AOTCharacterBase::AOTCharacterBase(const FObjectInitializer& ObjectInitializer)
 	GetMesh()->SetRelativeLocation(FVector(0.0f, 0.0f, -96.0f));
 	GetMesh()->SetRelativeRotation(FRotator(0.0f, -90.0f, 0.0f));
 	GetMesh()->SetOwnerNoSee(true);
-	GetMesh()->bCastDynamicShadow = true;
-	GetMesh()->CastShadow = true;
 }
 
 void AOTCharacterBase::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
@@ -292,6 +290,12 @@ void AOTCharacterBase::MulticastKick_Implementation()
 		GetMesh()->SetOwnerNoSee(false);
 	}
 
+	if (FirstPersonKickMontage)
+	{
+		UAnimInstance* AnimInstance = FirstPersonMesh->GetAnimInstance();
+		AnimInstance->Montage_Play(FirstPersonKickMontage, 1.f);
+	}
+
 	GetCharacterMovement()->MovementMode = EMovementMode::MOVE_None;
 }
 
@@ -300,6 +304,7 @@ void AOTCharacterBase::OnKickMontageEnded(UAnimMontage* Montage, bool bInterrupt
 	if (Montage == ThirdPersonKickMontage)
 	{
 		bIsKicking = false;
+
 		GetMesh()->SetOwnerNoSee(true);
 	}
 
@@ -376,7 +381,7 @@ void AOTCharacterBase::TriggerWallDestruction(FVector_NetQuantize ImpactPoint, F
 							const float ForceMultiplier = 1000000.0f;
 							FVector ImpactDirection = (ImpactPoint - WallLocation).GetSafeNormal();
 							GeoComp->AddImpulseAtLocation(ImpactDirection * ForceMultiplier, ImpactPoint);
-						}, 0.3f, false);
+						}, 0.1f, false);
 
 					FTimerHandle DestroyTimerHandle;
 					FTimerDelegate DestroyDelegate;

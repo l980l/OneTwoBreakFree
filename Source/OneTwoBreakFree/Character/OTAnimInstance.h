@@ -33,4 +33,19 @@ protected:
 
 	UPROPERTY(BlueprintReadOnly, Category = Movement, meta = (AllowPrivateAccess = "true"))
 	float ForwardMovement;
+
+	UPROPERTY(BlueprintReadOnly, Category = "Turn In Place", meta = (AllowPrivateAccess = "true"))
+	float RotationLastFrame;
+
+	UPROPERTY(BlueprintReadOnly, Category = "Turn In Place", meta = (AllowPrivateAccess = "true"))
+	float RotationCurrentFrame;
+
+	UPROPERTY(BlueprintReadOnly, Category = "Turn In Place", meta = (AllowPrivateAccess = "true"))
+	float DeltaRotation;
+
+	UPROPERTY(BlueprintReadOnly, Category = "Turn In Place", meta = (AllowPrivateAccess = "true"))
+	uint8 bIsTurning : 1;
+
+	UPROPERTY(BlueprintReadOnly, Category = "Turn In Place", meta = (AllowPrivateAccess = "true"))
+	int32 TurnDirection; // -1 = 왼쪽, 1 = 오른쪽, 0 = 회전 없음
 };

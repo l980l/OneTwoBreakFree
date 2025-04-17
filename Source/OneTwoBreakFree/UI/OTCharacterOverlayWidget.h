@@ -8,6 +8,7 @@
 
 class UProgressBar;
 class UTextBlock;
+class UImage;
 
 /**
  * 
@@ -26,6 +27,9 @@ public:
 
 	UPROPERTY(meta = (BindWidget))
 	TObjectPtr<UTextBlock> MatchTimeText;
+
+	UPROPERTY(meta = (BindWidget))
+	TObjectPtr<UImage> DotCrosshair;
 
 	UPROPERTY(Transient, BlueprintReadWrite, meta = (BindWidgetAnim))
 	TObjectPtr<UWidgetAnimation> FadeInAnimation;
@@ -56,4 +60,8 @@ public:
 	void SetupKillerWidget();
 	void SetRifleAmmo(int32 CurrentAmmo, int32 MaxAmmo);
 	void SetBazookaPercent(float BazookaPercent);
+	void FlashCrosshairRed();
+
+private:
+	FTimerHandle CrosshairColorResetTimerHandle;
 };

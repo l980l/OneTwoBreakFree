@@ -253,6 +253,7 @@ void UOTWeaponComponent::SwapWeapon()
 		int32 NextWeaponIndex = (CurrentWeaponIndex + 1) % Weapons.Num();
 		CurrentWeaponIndex = NextWeaponIndex;
 
+		OnWeaponSwap.Broadcast();
 		ApplyWeaponSwapEffects();
 
 		GetWorld()->GetTimerManager().SetTimer(
@@ -267,12 +268,21 @@ void UOTWeaponComponent::SwapWeapon()
 	}
 }
 
-void UOTWeaponComponent::SetWeaponOwnerPlayerController(AOTPlayerController* NewPlayerController)
+bool UOTWeaponComponent::SetWeaponOwnerPlayerController(AOTPlayerController* NewPlayerController)
 {
 	for (int i = 0; i < Weapons.Num(); ++i)
 	{
-		Weapons[i]->SetOwnerPlayerController(NewPlayerController);
+		if (Weapons[i])
+		{
+			Weapons[i]->SetOwnerPlayerController(NewPlayerController);
+		}
+		else
+		{
+			return false;
+		}
 	}
+
+	return true;
 }
 
 void UOTWeaponComponent::ServerSwapWeapon_Implementation()
@@ -287,6 +297,7 @@ void UOTWeaponComponent::ServerSwapWeapon_Implementation()
 		return;
 	}
 
+	OnWeaponSwap.Broadcast();
 	bIsSwapping = true;
 
 	int32 NextWeaponIndex = (CurrentWeaponIndex + 1) % Weapons.Num();

@@ -4,6 +4,9 @@
 #include "OTCharacterOverlayWidget.h"
 #include "Components/ProgressBar.h"
 #include "Components/TextBlock.h"
+#include "Components/Image.h"
+#include "TimerManager.h"
+#include "Engine/World.h"
 
 void UOTCharacterOverlayWidget::SetHealthPercent(float HealthPercent)
 {
@@ -117,5 +120,23 @@ void UOTCharacterOverlayWidget::SetBazookaPercent(float BazookaPercent)
         {
             BazookaCooltimeProgress->SetRenderOpacity(0.2f);
         }
+    }
+}
+
+void UOTCharacterOverlayWidget::FlashCrosshairRed()
+{
+    if (DotCrosshair)
+    {
+        DotCrosshair->SetColorAndOpacity(FLinearColor::Red);
+
+        GetWorld()->GetTimerManager().SetTimer(
+            CrosshairColorResetTimerHandle,
+            [this]()
+            {
+                DotCrosshair->SetColorAndOpacity(FLinearColor::White);
+            },
+            0.7f,
+            false
+        );
     }
 }

@@ -27,4 +27,10 @@ protected:
 
 	UPROPERTY(BlueprintReadOnly, Category = Weapon, meta = (AllowPrivateAccess = "true"))
 	uint8 bIsSwapping : 1;
+
+	UPROPERTY(BlueprintReadOnly, Category = Aim, meta = (AllowPrivateAccess = "true"))
+	float Yaw;
+
+	UPROPERTY(BlueprintReadOnly, Category = Aim, meta = (AllowPrivateAccess = "true"))
+	float Pitch;
 };
