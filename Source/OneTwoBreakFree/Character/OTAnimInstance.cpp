@@ -10,6 +10,16 @@ void UOTAnimInstance::NativeInitializeAnimation()
 	Super::NativeInitializeAnimation();
 
 	OTCharacter = Cast<AOTCharacterBase>(TryGetPawnOwner());
+	Speed = 0.0f;
+	bIsSprinting = false;
+	Direction = 0.0f;
+	ForwardMovement = 0.0f;
+
+	RotationLastFrame = 0.0f;
+	RotationCurrentFrame = 0.0f;
+	DeltaRotation = 0.0f;
+	bIsTurning = false;
+	TurnDirection = 0;
 }
 
 void UOTAnimInstance::NativeUpdateAnimation(float DeltaTime)
@@ -26,35 +36,57 @@ void UOTAnimInstance::NativeUpdateAnimation(float DeltaTime)
 	Speed = Velocity.Size();
 	bIsSprinting = OTCharacter->GetIsSprinting();
 
-	if (Speed > 0.0f)
+	const FRotator ActorRotation = OTCharacter->GetActorRotation();
+
+	const FRotator VelocityRotation = UKismetMathLibrary::MakeRotFromX(Velocity);
+
+	float YawDelta = UKismetMathLibrary::NormalizedDeltaRotator(VelocityRotation, ActorRotation).Yaw;
+
+	if (YawDelta > 90.f)
 	{
-		const FRotator ActorRotation = OTCharacter->GetActorRotation();
-
-		const FRotator VelocityRotation = UKismetMathLibrary::MakeRotFromX(Velocity);
-
-		float YawDelta = UKismetMathLibrary::NormalizedDeltaRotator(VelocityRotation, ActorRotation).Yaw;
-
-		if (YawDelta > 90.f)
-		{
-			YawDelta = 180.f - YawDelta;
-		}
-		else if (YawDelta < -90.f)
-		{
-			YawDelta = -180.f - YawDelta;
-		}
-
-		const float ProperSizeUpNum = 2.f;
-		Direction = YawDelta * ProperSizeUpNum;
-		Direction = FMath::Clamp(Direction, -100.0f, 100.0f);
-
-		const FVector ForwardVector = OTCharacter->GetActorForwardVector();
-		ForwardMovement = FVector::DotProduct(ForwardVector, Velocity.GetSafeNormal()) * 100.0f * ProperSizeUpNum;
-
-		ForwardMovement = FMath::Clamp(ForwardMovement, -100.0f, 100.0f);
+		YawDelta = 180.f - YawDelta;
 	}
-	else
+	else if (YawDelta < -90.f)
+	{
+		YawDelta = -180.f - YawDelta;
+	}
+
+	const float ProperSizeUpNum = 2.f;
+	Direction = YawDelta * ProperSizeUpNum;
+	Direction = FMath::Clamp(Direction, -100.0f, 100.0f);
+
+	const FVector ForwardVector = OTCharacter->GetActorForwardVector();
+	ForwardMovement = FVector::DotProduct(ForwardVector, Velocity.GetSafeNormal()) * 100.0f * ProperSizeUpNum;
+
+	ForwardMovement = FMath::Clamp(ForwardMovement, -100.0f, 100.0f);
+
+	bIsTurning = false;
+	TurnDirection = 0;
+
+	if (Speed <= 0.01f)
 	{
 		Direction = 0.0f;
 		ForwardMovement = 0.0f;
+
+		RotationCurrentFrame = OTCharacter->GetActorRotation().Yaw;
+
+		FRotator CurrentRot = FRotator(0, RotationCurrentFrame, 0);
+		FRotator LastRot = FRotator(0, RotationLastFrame, 0);
+		FRotator DeltaRot = UKismetMathLibrary::NormalizedDeltaRotator(CurrentRot, LastRot);
+		DeltaRotation = DeltaRot.Yaw;
+
+		const float TurnThreshold = 5.f;
+		if (FMath::Abs(DeltaRotation) > TurnThreshold)
+		{
+			bIsTurning = true;
+			TurnDirection = DeltaRotation > 0 ? 1 : -1;
+		}
+		else
+		{
+			bIsTurning = false;
+			TurnDirection = 0;
+		}
 	}
+
+	RotationLastFrame = OTCharacter->GetActorRotation().Yaw;
 }

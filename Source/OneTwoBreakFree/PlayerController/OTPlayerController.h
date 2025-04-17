@@ -19,10 +19,15 @@ public:
     virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
     void SetHUDHealth(float HealthPercent);
+    void SetHUDHealthMarquee(bool bMarquee);
     void SetHUDStamina(float StaminaPercent);
     void ShowHUDStamina(bool bShow);
     void SetHUDMatchTime(int32 Minutes, int32 Seconds);
     void SetHUDMatchTimeFromSeconds(float TotalSeconds);
+    void SetupKillerWidget();
+    void SetHUDRifleAmmo(int32 CurrentAmmo, int32 MaxAmmo);
+    void SetHUDBazookaPercent(float BazookaPercent);
+    void FlashCrosshairRed();
     
     UPROPERTY(ReplicatedUsing = OnRep_MatchState)
     FName MatchState;

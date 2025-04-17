@@ -6,6 +6,7 @@
 #include "OneTwoBreakFree/CharacterComponent/OTHealthComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "OTCharacterMovementComponent.h"
+#include "OneTwoBreakFree/PlayerController/OTPlayerController.h"
 
 AOTCitizenCharacter::AOTCitizenCharacter(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer.SetDefaultSubobjectClass<UOTCharacterMovementComponent>(ACharacter::CharacterMovementComponentName))
@@ -26,7 +27,7 @@ void AOTCitizenCharacter::BeginPlay()
 	}
 }
 
-void AOTCitizenCharacter::OnHealthChanged(UOTHealthComponent* HealthComp, float Health, float HealthDelta, const UDamageType* DamageType)
+void AOTCitizenCharacter::OnHealthChanged(UOTHealthComponent* HealthComp, float Health, float HealthDelta)
 {
 	// 체력 변화시 실행될 로직
 	// 여기서는 아무것도 하지 않지만 필요에 따라 확장 가능
@@ -36,38 +37,37 @@ void AOTCitizenCharacter::OnHealthChanged(UOTHealthComponent* HealthComp, float 
 	if (IsLocallyControlled())
 	{
 		// HUD 적용, 화면 효과
+		if (AOTPlayerController* PC = Cast<AOTPlayerController>(Controller))
+		{
+			PC->SetHUDHealth(Health / GetMaxHealth());
+			PC->ClientStartCameraShake(FireCameraShake, 5.0f);
+		}
 	}
 }
 
 void AOTCitizenCharacter::OnCharacterDeath(UOTHealthComponent* HealthComp, AActor* KilledActor, AActor* KillerActor)
 {
-	// 캐릭터가 죽었을 때 실행될 로직
-	// 이동 기능 비활성화
 	GetCharacterMovement()->DisableMovement();
 
 	// 컨트롤러 분리 (서버에서만)
-	if (HasAuthority() && GetController())
+	/*if (HasAuthority() && GetController())
 	{
 		GetController()->UnPossess();
-	}
+	}*/
 
-	// 콜리전 비활성화
 	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 
-	// 사망 애니메이션
-
-	// 래그돌 활성화 (시각적 효과)
 	GetMesh()->SetSimulatePhysics(true);
 	GetMesh()->SetCollisionEnabled(ECollisionEnabled::PhysicsOnly);
 
-	// 타이머로 일정 시간 후 캐릭터 제거 (서버에서만)
 	if (HasAuthority())
 	{
-		SetLifeSpan(10.0f); // 10초 후 제거
+		SetLifeSpan(10.0f);
 	}
 
 	if (IsLocallyControlled())
 	{
+		// 사망 HUD
 		// HUD 적용, 화면 효과
 	}
 }

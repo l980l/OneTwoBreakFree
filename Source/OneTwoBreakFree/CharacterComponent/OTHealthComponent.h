@@ -6,7 +6,7 @@
 #include "Components/ActorComponent.h"
 #include "OTHealthComponent.generated.h"
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_FourParams(FOnHealthChangedSignature, UOTHealthComponent*, HealthComp, float, Health, float, HealthDelta, const class UDamageType*, DamageType);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_ThreeParams(FOnHealthChangedSignature, UOTHealthComponent*, HealthComp, float, Health, float, HealthDelta);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_ThreeParams(FOnDeathSignature, UOTHealthComponent*, HealthComp, AActor*, KilledActor, AActor*, KillerActor);
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
@@ -31,18 +31,18 @@ protected:
     UFUNCTION()
     void HandleTakeAnyDamage(AActor* DamagedActor, float Damage, const class UDamageType* DamageType, class AController* InstigatedBy, AActor* DamageCauser);
 
-    UFUNCTION()
-    void HandleDeath(AActor* KillerActor);
-
 public:
     UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Health", Replicated)
     float MaxHealth;
 
-    UPROPERTY(BlueprintReadOnly, Category = "Health", Replicated)
+    UPROPERTY(BlueprintReadOnly, Category = "Health", ReplicatedUsing = OnRep_Health)
     float Health;
 
     UPROPERTY(BlueprintReadOnly, Category = "Health", Replicated)
     uint8 bIsDead : 1;
+
+    UFUNCTION()
+    void OnRep_Health(float OldHealth);
 
     UFUNCTION(NetMulticast, Reliable)
     void MulticastOnDeath(AActor* KillerActor);
