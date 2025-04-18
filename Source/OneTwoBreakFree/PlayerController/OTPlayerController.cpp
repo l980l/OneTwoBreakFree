@@ -124,6 +124,16 @@ void AOTPlayerController::FlashCrosshairRed()
     }
 }
 
+void AOTPlayerController::FlashHitMarker()
+{
+    if (!OTHUD)
+        OTHUD = Cast<AOTHUD>(GetHUD());
+    if (OTHUD && OTHUD->CharacterOverlay)
+    {
+        OTHUD->CharacterOverlay->FlashHitMarker();
+    }
+}
+
 void AOTPlayerController::OnMatchStateSet(FName State)
 {
     MatchState = State;

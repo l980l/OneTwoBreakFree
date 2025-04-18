@@ -37,7 +37,6 @@ public:
 	UPROPERTY(Transient, BlueprintReadWrite, meta = (BindWidgetAnim))
 	TObjectPtr<UWidgetAnimation> FadeOutAnimation;
 
-	// Å³·¯
 	UPROPERTY(meta = (BindWidget))
 	TObjectPtr<UTextBlock> RifleText;
 
@@ -50,6 +49,9 @@ public:
 	UPROPERTY(meta = (BindWidget))
 	TObjectPtr<UProgressBar> BazookaCooltimeProgress;
 
+	UPROPERTY(meta = (BindWidget))
+	TObjectPtr<UImage> HitMarker;
+
 public:
 	void SetHealthPercent(float HealthPercent);
 	void SetHealthMarquee(bool bMarquee);
@@ -61,7 +63,9 @@ public:
 	void SetRifleAmmo(int32 CurrentAmmo, int32 MaxAmmo);
 	void SetBazookaPercent(float BazookaPercent);
 	void FlashCrosshairRed();
+	void FlashHitMarker();
 
 private:
 	FTimerHandle CrosshairColorResetTimerHandle;
+	FTimerHandle HitMarkerTimerHandle;
 };

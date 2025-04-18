@@ -28,6 +28,7 @@ public:
     void SetHUDRifleAmmo(int32 CurrentAmmo, int32 MaxAmmo);
     void SetHUDBazookaPercent(float BazookaPercent);
     void FlashCrosshairRed();
+    void FlashHitMarker();
     
     UPROPERTY(ReplicatedUsing = OnRep_MatchState)
     FName MatchState;
