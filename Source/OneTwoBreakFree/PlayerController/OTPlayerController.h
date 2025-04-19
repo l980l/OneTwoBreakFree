@@ -17,6 +17,15 @@ class ONETWOBREAKFREE_API AOTPlayerController : public APlayerController
 public:
     virtual void BeginPlay() override;
     virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
+    
+    UFUNCTION()
+    void OnRep_MatchState();
+    
+    void OnMatchStateSet(FName State);
+    void HandleMatchHasStarted();
+
+    UPROPERTY(ReplicatedUsing = OnRep_MatchState)
+    FName MatchState;
 
     void SetHUDHealth(float HealthPercent);
     void SetHUDHealthMarquee(bool bMarquee);
@@ -29,15 +38,6 @@ public:
     void SetHUDBazookaPercent(float BazookaPercent);
     void FlashCrosshairRed();
     void FlashHitMarker();
-    
-    UPROPERTY(ReplicatedUsing = OnRep_MatchState)
-    FName MatchState;
-
-    UFUNCTION()
-    void OnRep_MatchState();
-
-    void OnMatchStateSet(FName State);
-    void HandleMatchHasStarted();
 
 private:
     UPROPERTY()

@@ -15,6 +15,8 @@ void AOTPlayerController::BeginPlay()
     Super::BeginPlay();
 
     OTHUD = Cast<AOTHUD>(GetHUD());
+
+    SetInputMode(FInputModeGameOnly());
 }
 
 void AOTPlayerController::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
