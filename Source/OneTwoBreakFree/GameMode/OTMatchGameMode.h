@@ -76,4 +76,6 @@ private:
     void TeleportPlayersToLocations(const TArray<FVector>& Locations);
 
     bool bIsMapGenerated = false;
+
+    friend class AOTMatchGameState;
 };

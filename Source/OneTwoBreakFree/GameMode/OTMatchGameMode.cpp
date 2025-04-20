@@ -7,6 +7,7 @@
 #include "Net/UnrealNetwork.h"
 #include "Kismet/GameplayStatics.h"
 #include "Components/SplineComponent.h"
+#include "OneTwoBreakFree/GameInstance/OTGameInstance.h"
 #include "GameFramework/PlayerState.h"
 
 AOTMatchGameMode::AOTMatchGameMode()
@@ -17,6 +18,12 @@ AOTMatchGameMode::AOTMatchGameMode()
 void AOTMatchGameMode::BeginPlay()
 {
 	Super::BeginPlay();
+
+    UOTGameInstance* GameInstance = Cast<UOTGameInstance>(GetGameInstance());
+    if (GameInstance)
+    {
+        MaxPlayers = GameInstance->PlayerCount;
+    }
 
 	StartPCGMapGeneration();
 }
@@ -101,10 +108,18 @@ void AOTMatchGameMode::CheckAndStartGameIfReady()
 {
     int32 CurrentPlayerCount = GetWorld()->GetNumPlayerControllers();
 
-    if ((MatchState == MatchState::WaitingToStart) && bIsMapGenerated && CurrentPlayerCount >= MaxPlayers)
-    {
-        StartGame();
-    }
+    if ((MatchState != MatchState::WaitingToStart) || !bIsMapGenerated || (CurrentPlayerCount < MaxPlayers))
+        return;
+
+    FTimerHandle StartGameTimerHandle;
+
+    GetWorld()->GetTimerManager().SetTimer(
+        StartGameTimerHandle,
+        this,
+        &AOTMatchGameMode::StartGame,
+        5.f,
+        false
+    );
 }
 
 void AOTMatchGameMode::StartGame()

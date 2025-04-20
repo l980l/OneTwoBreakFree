@@ -56,8 +56,9 @@ protected:
     int32 MaxPlayers = 4;
 
 private:
+    void SetGameInstancePlayerCount();
+    bool FindPlayerInfo(APlayerController* Player, FLobbyPlayerInfo& OutInfo, int32& OutIndex) const;
+
     UPROPERTY()
     TArray<FLobbyPlayerInfo> LobbyPlayers;
-
-    bool FindPlayerInfo(APlayerController* Player, FLobbyPlayerInfo& OutInfo, int32& OutIndex) const;
 };

@@ -4,6 +4,7 @@
 #include "OTLobbyGameMode.h"
 #include "GameFramework/PlayerState.h"
 #include "OneTwoBreakFree/PlayerController/OTLobbyPlayerController.h"
+#include "OneTwoBreakFree/GameInstance/OTGameInstance.h"
 
 void AOTLobbyGameMode::PostLogin(APlayerController* NewPlayer)
 {
@@ -55,7 +56,7 @@ void AOTLobbyGameMode::Logout(AController* Exiting)
     }
 
     Super::Logout(Exiting);
-
+    
     BroadcastLobbyState();
 }
 
@@ -122,6 +123,8 @@ void AOTLobbyGameMode::StartGame()
 
     const FString URL = TEXT("/Game/Levels/") + MatchLevelName.ToString() + TEXT("?listen");
 
+    SetGameInstancePlayerCount();
+
     bUseSeamlessTravel = true;
     GetWorld()->ServerTravel(URL);
 }
@@ -156,6 +159,15 @@ int32 AOTLobbyGameMode::GetReadyPlayerCount() const
 int32 AOTLobbyGameMode::GetPlayerCount() const
 {
     return LobbyPlayers.Num();
+}
+
+void AOTLobbyGameMode::SetGameInstancePlayerCount()
+{
+    UOTGameInstance* GameInstance = Cast<UOTGameInstance>(GetGameInstance());
+    if (GameInstance)
+    {
+        GameInstance->PlayerCount = LobbyPlayers.Num();
+    }
 }
 
 bool AOTLobbyGameMode::FindPlayerInfo(APlayerController* Player, FLobbyPlayerInfo& OutInfo, int32& OutIndex) const
