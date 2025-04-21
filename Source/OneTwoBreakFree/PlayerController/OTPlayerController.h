@@ -38,8 +38,15 @@ public:
     void SetHUDBazookaPercent(float BazookaPercent);
     void FlashCrosshairRed();
     void FlashHitMarker();
+    void HideLoadingUI();
 
 private:
     UPROPERTY()
     TObjectPtr<class AOTHUD> OTHUD;
+
+    UPROPERTY(EditAnywhere, Category = "Widgets")
+    TSubclassOf<class UOTLoadingUI> LoadingUIClass;
+
+    UPROPERTY()
+    TObjectPtr<class UOTLoadingUI> LoadingUI;
 };

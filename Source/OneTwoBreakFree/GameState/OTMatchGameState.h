@@ -18,6 +18,10 @@ public:
 	UFUNCTION()
 	void OnRep_PCGRandomSeed();
 
+	UFUNCTION(NetMulticast, Reliable)
+	void MulticastOnAllClientsReady();
+
+public:
 	UPROPERTY(ReplicatedUsing = OnRep_PCGRandomSeed, Transient)
 	int32 PCGRandomSeed;
 

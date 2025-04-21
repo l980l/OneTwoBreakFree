@@ -40,10 +40,15 @@ public:
     UFUNCTION(BlueprintCallable, Category = "Player")
     void SetPlayerNewName(const FString& NewName);
 
+    UFUNCTION()
+    void SetLoadingUIVisibile();
+
     UPROPERTY(BlueprintReadOnly, Replicated, Category = "Lobby")
     uint8 bIsReadyForMatch : 1 = false;
 
 private:
     UPROPERTY()
     TObjectPtr<class AOTLobbyHUD> OTLobbyHUD;
+
+    FTimerHandle InitPlayerReadyStateTimerHandle;
 };

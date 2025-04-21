@@ -4,6 +4,7 @@
 #include "OTLobbyUI.h"
 #include "Components/Button.h"
 #include "Components/TextBlock.h"
+#include "Components/Border.h"
 #include "Components/VerticalBox.h"
 #include "Components/EditableTextBox.h"
 #include "OneTwoBreakFree/PlayerController/OTLobbyPlayerController.h"
@@ -215,6 +216,19 @@ void UOTLobbyUI::UpdatePlayerList(const TArray<FLobbyPlayerInfo>& PlayersInfo)
         {
             PlayerListBox->AddChild(PlayerItem);
         }
+    }
+}
+
+void UOTLobbyUI::SetLoadingUIVisible()
+{
+    if (LoadingBoarder)
+    {
+        LoadingBoarder->SetVisibility(ESlateVisibility::Visible);
+    }
+
+    if (LoadingText)
+    {
+        LoadingText->SetVisibility(ESlateVisibility::Visible);
     }
 }
 

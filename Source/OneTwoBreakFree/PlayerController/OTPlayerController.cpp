@@ -5,6 +5,7 @@
 #include "OneTwoBreakFree/UI/OTCharacterOverlayWidget.h"
 #include "OneTwoBreakFree/UI/OTAnnouncementWidget.h"
 #include "OneTwoBreakFree/UI/OTHUD.h"
+#include "OneTwoBreakFree/UI/OTLoadingUI.h"
 #include "Kismet/GameplayStatics.h"
 #include "OneTwoBreakFree/GameState/OTMatchGameState.h"
 #include "OneTwoBreakFree/GameMode/OTMatchGameMode.h"
@@ -13,6 +14,15 @@
 void AOTPlayerController::BeginPlay()
 {
     Super::BeginPlay();
+
+    if (IsLocalPlayerController())
+    {
+        LoadingUI = CreateWidget<UOTLoadingUI>(this, LoadingUIClass);
+        if (LoadingUI)
+        {
+            LoadingUI->AddToViewport();
+        }
+    }
 
     OTHUD = Cast<AOTHUD>(GetHUD());
 
@@ -133,6 +143,14 @@ void AOTPlayerController::FlashHitMarker()
     if (OTHUD && OTHUD->CharacterOverlay)
     {
         OTHUD->CharacterOverlay->FlashHitMarker();
+    }
+}
+
+void AOTPlayerController::HideLoadingUI()
+{
+    if (LoadingUI)
+    {
+        LoadingUI->HideLoadingUI();
     }
 }
 

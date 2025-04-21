@@ -12,6 +12,7 @@ class UTextBlock;
 class UVerticalBox;
 class UEditableTextBox;
 class AOTLobbyPlayerController;
+class UBorder;
 
 /**
  * 
@@ -52,12 +53,19 @@ public:
 	UPROPERTY(meta = (BindWidget))
 	TObjectPtr<UButton> SetNameButton;
 
+	UPROPERTY(meta = (BindWidget))
+	TObjectPtr<UBorder> LoadingBoarder;
+
+	UPROPERTY(meta = (BindWidget))
+	TObjectPtr<UTextBlock> LoadingText;
+
 public:
 	virtual void NativeConstruct() override;
 
 	void UpdateLobbyState(const TArray<struct FLobbyPlayerInfo>& PlayersInfo, bool bCanStart);
 	void UpdateReadyButtonText(bool bIsReady);
 	void UpdatePlayerList(const TArray<struct FLobbyPlayerInfo>& PlayersInfo);
+	void SetLoadingUIVisible();
 
 	UFUNCTION(Category = "Lobby")
 	class UUserWidget* CreatePlayerListItem(const FString& PlayerName, bool bIsReady, bool bIsHost);

@@ -130,6 +130,12 @@ void AOTMatchGameMode::StartGame()
     int32 CurrentPlayerCount = GetWorld()->GetNumPlayerControllers();
     UE_LOG(LogTemp, Log, TEXT("Starting game with %d players"), CurrentPlayerCount);
 
+    AOTMatchGameState* MatchGS = GetGameState<AOTMatchGameState>();
+    if (MatchGS)
+    {
+        MatchGS->MulticastOnAllClientsReady();
+    }
+
     AssignPlayerRoles();
 
     TArray<FVector> SpawnLocations = FindPlayerSpawnLocations(CurrentPlayerCount);
@@ -204,16 +210,6 @@ void AOTMatchGameMode::AssignPlayerRoles()
 
     int32 KillerIndex = FMath::RandRange(0, PlayerControllers.Num() - 1);
     KillerPlayerController = PlayerControllers[KillerIndex];
-
-
-    // µð¹ö±ë ÄÚµå
-    for (int32 i = 0; i < PlayerControllers.Num(); i++)
-    {
-        APlayerController* PC = PlayerControllers[i];
-        EOTCharacterRole CharacterRole = (i == KillerIndex) ? EOTCharacterRole::ECR_Killer : EOTCharacterRole::ECR_Citizen;
-
-        UE_LOG(LogTemp, Log, TEXT("Assigned role to player %s: %s"), *PC->GetPlayerState<APlayerState>()->GetPlayerName(), (CharacterRole == EOTCharacterRole::ECR_Killer) ? TEXT("Killer") : TEXT("Citizen"));
-    }
 }
 
 TArray<FVector> AOTMatchGameMode::FindPlayerSpawnLocations(int32 CountPlayers)

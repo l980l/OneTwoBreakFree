@@ -123,6 +123,15 @@ void AOTLobbyGameMode::StartGame()
 
     const FString URL = TEXT("/Game/Levels/") + MatchLevelName.ToString() + TEXT("?listen");
 
+    for (FConstPlayerControllerIterator It = GetWorld()->GetPlayerControllerIterator(); It; ++It)
+    {
+        AOTLobbyPlayerController* PC = Cast<AOTLobbyPlayerController>(It->Get());
+        if (PC)
+        {
+            PC->SetLoadingUIVisibile();
+        }
+    }
+
     SetGameInstancePlayerCount();
 
     bUseSeamlessTravel = true;

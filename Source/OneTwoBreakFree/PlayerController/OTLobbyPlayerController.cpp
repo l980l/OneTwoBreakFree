@@ -60,12 +60,11 @@ void AOTLobbyPlayerController::ClientUpdateLobbyState_Implementation(const TArra
     if (OTLobbyHUD && OTLobbyHUD->LobbyWidget)
     {
         OTLobbyHUD->LobbyWidget->UpdateLobbyState(PlayersInfo, bCanStart);
+        GetWorld()->GetTimerManager().ClearTimer(InitPlayerReadyStateTimerHandle);
     }
 
     else
     {
-        FTimerHandle InitPlayerReadyStateTimerHandle;
-
         GetWorld()->GetTimerManager().SetTimer(
             InitPlayerReadyStateTimerHandle,
             [this, PlayersInfo, bCanStart]()
@@ -113,4 +112,14 @@ void AOTLobbyPlayerController::ServerSetPlayerName_Implementation(const FString&
 void AOTLobbyPlayerController::SetPlayerNewName(const FString& NewName)
 {
     ServerSetPlayerName(NewName);
+}
+
+void AOTLobbyPlayerController::SetLoadingUIVisibile()
+{
+    if (!OTLobbyHUD)
+        OTLobbyHUD = Cast<AOTLobbyHUD>(GetHUD());
+    if (OTLobbyHUD && OTLobbyHUD->LobbyWidget)
+    {
+        OTLobbyHUD->LobbyWidget->SetLoadingUIVisible();
+    }
 }

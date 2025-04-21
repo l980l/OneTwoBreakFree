@@ -5,6 +5,7 @@
 #include "PCGComponent.h"
 #include "OneTwoBreakFree/Backrooms/OTBackroomsActor.h"
 #include "OneTwoBreakFree/GameMode/OTMatchGameMode.h"
+#include "OneTwoBreakFree/PlayerController/OTPlayerController.h"
 #include "Net/UnrealNetwork.h"
 #include "Kismet/GameplayStatics.h"
 
@@ -41,6 +42,18 @@ void AOTMatchGameState::OnRep_PCGRandomSeed()
 		else
 		{
 			UE_LOG(LogTemp, Error, TEXT("PCG Backrooms Actor Spawning Fail"));
+		}
+	}
+}
+
+void AOTMatchGameState::MulticastOnAllClientsReady_Implementation()
+{
+	for (FConstPlayerControllerIterator It = GetWorld()->GetPlayerControllerIterator(); It; ++It)
+	{
+		AOTPlayerController* PC = Cast<AOTPlayerController>(It->Get());
+		if (PC)
+		{
+			PC->HideLoadingUI();
 		}
 	}
 }
