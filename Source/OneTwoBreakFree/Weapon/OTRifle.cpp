@@ -141,7 +141,7 @@ void AOTRifle::MulticastImpactEffects_Implementation(FVector_NetQuantize ImpactP
     }
 }
 
-void AOTRifle::ClientFlashCrosshairRed_Implementation()
+void AOTRifle::ClientFlashHitMarker_Implementation()
 {
     if (OwnerPlayerController)
     {
@@ -149,6 +149,7 @@ void AOTRifle::ClientFlashCrosshairRed_Implementation()
         if (PC)
         {
             PC->FlashCrosshairRed();
+            PC->FlashHitMarker();
         }
     }
 }
@@ -205,7 +206,7 @@ void AOTRifle::FireLineTrace()
                 nullptr                        
             );
         
-            ClientFlashCrosshairRed();
+            ClientFlashHitMarker();
         }
 
         MulticastImpactEffects(Hit.ImpactPoint, Hit.ImpactNormal);

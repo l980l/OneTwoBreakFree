@@ -5,16 +5,44 @@
 #include "OneTwoBreakFree/UI/OTCharacterOverlayWidget.h"
 #include "OneTwoBreakFree/UI/OTAnnouncementWidget.h"
 #include "OneTwoBreakFree/UI/OTHUD.h"
+#include "OneTwoBreakFree/UI/OTLoadingUI.h"
 #include "Kismet/GameplayStatics.h"
 #include "OneTwoBreakFree/GameState/OTMatchGameState.h"
 #include "OneTwoBreakFree/GameMode/OTMatchGameMode.h"
 #include "Net/UnrealNetwork.h"
 
+AOTPlayerController::AOTPlayerController()
+{
+    
+}
+
 void AOTPlayerController::BeginPlay()
 {
     Super::BeginPlay();
 
+    if (IsLocalPlayerController())
+    {
+        LoadingUI = CreateWidget<UOTLoadingUI>(this, LoadingUIClass);
+        if (LoadingUI)
+        {
+            LoadingUI->AddToViewport();
+        }
+    }
+
     OTHUD = Cast<AOTHUD>(GetHUD());
+
+    SetInputMode(FInputModeGameOnly());
+}
+
+void AOTPlayerController::Tick(float DeltaTime)
+{
+    Super::Tick(DeltaTime);
+
+    if (MatchState == MatchState::InProgress && MatchStartTimestamp > 0.f)
+    {
+        float ElapsedTime = GetWorld()->GetTimeSeconds() - MatchStartTimestamp;
+        SetHUDMatchTimeFromSeconds(ElapsedTime);
+    }
 }
 
 void AOTPlayerController::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
@@ -124,6 +152,24 @@ void AOTPlayerController::FlashCrosshairRed()
     }
 }
 
+void AOTPlayerController::FlashHitMarker()
+{
+    if (!OTHUD)
+        OTHUD = Cast<AOTHUD>(GetHUD());
+    if (OTHUD && OTHUD->CharacterOverlay)
+    {
+        OTHUD->CharacterOverlay->FlashHitMarker();
+    }
+}
+
+void AOTPlayerController::HideLoadingUI()
+{
+    if (LoadingUI)
+    {
+        LoadingUI->HideLoadingUI();
+    }
+}
+
 void AOTPlayerController::OnMatchStateSet(FName State)
 {
     MatchState = State;
@@ -144,6 +190,11 @@ void AOTPlayerController::OnRep_MatchState()
 
 void AOTPlayerController::HandleMatchHasStarted()
 {
+    if (IsLocalPlayerController())
+    {
+        MatchStartTimestamp = GetWorld()->GetTimeSeconds();
+    }
+
     if(!OTHUD)
         OTHUD = Cast<AOTHUD>(GetHUD());
 
@@ -156,7 +207,9 @@ void AOTPlayerController::HandleMatchHasStarted()
         if (OTHUD->Announcement == nullptr)
         {
             OTHUD->AddAnnouncement();
-            OTHUD->Announcement->SetVisibility(ESlateVisibility::Hidden);
+            OTHUD->Announcement->ShowAnnouncement(EAnnouncementType::EANMT_MatchStart);
         }
     }
+
+    HideLoadingUI();
 }

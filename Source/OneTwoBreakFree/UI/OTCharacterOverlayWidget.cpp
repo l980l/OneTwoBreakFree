@@ -135,7 +135,25 @@ void UOTCharacterOverlayWidget::FlashCrosshairRed()
             {
                 DotCrosshair->SetColorAndOpacity(FLinearColor::White);
             },
-            0.7f,
+            0.3f,
+            false
+        );
+    }
+}
+
+void UOTCharacterOverlayWidget::FlashHitMarker()
+{
+    if (HitMarker)
+    {
+        HitMarker->SetVisibility(ESlateVisibility::Visible);
+
+        GetWorld()->GetTimerManager().SetTimer(
+            HitMarkerTimerHandle,
+            [this]()
+            {
+                HitMarker->SetVisibility(ESlateVisibility::Hidden);
+            },
+            0.3f,
             false
         );
     }

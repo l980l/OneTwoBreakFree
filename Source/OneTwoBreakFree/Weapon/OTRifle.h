@@ -33,7 +33,7 @@ private:
 	void MulticastImpactEffects(FVector_NetQuantize ImpactPoint, FVector_NetQuantize ImpactNormal);
 
 	UFUNCTION(Client, Unreliable)
-	void ClientFlashCrosshairRed();
+	void ClientFlashHitMarker();
 
 	void FireLineTrace();
 	void PlayFireEffects();

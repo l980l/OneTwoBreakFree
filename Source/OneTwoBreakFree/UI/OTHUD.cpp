@@ -6,13 +6,6 @@
 #include "OTCharacterOverlayWidget.h"
 #include "OTAnnouncementWidget.h"
 
-void AOTHUD::DrawHUD()
-{
-	Super::DrawHUD();
-
-	// 크로스헤어 적용. 다만 무기를 들고 있는 경우에만 적용해야 한다. 
-}
-
 void AOTHUD::AddCharacterOverlay()
 {
 	APlayerController* PlayerController = GetOwningPlayerController();

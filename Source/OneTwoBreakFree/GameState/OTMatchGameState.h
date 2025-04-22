@@ -18,6 +18,7 @@ public:
 	UFUNCTION()
 	void OnRep_PCGRandomSeed();
 
+public:
 	UPROPERTY(ReplicatedUsing = OnRep_PCGRandomSeed, Transient)
 	int32 PCGRandomSeed;
 

@@ -2,9 +2,11 @@
 
 
 #include "OTMatchGameState.h"
-#include "Net/UnrealNetwork.h"
 #include "PCGComponent.h"
 #include "OneTwoBreakFree/Backrooms/OTBackroomsActor.h"
+#include "OneTwoBreakFree/GameMode/OTMatchGameMode.h"
+#include "OneTwoBreakFree/PlayerController/OTPlayerController.h"
+#include "Net/UnrealNetwork.h"
 #include "Kismet/GameplayStatics.h"
 
 void AOTMatchGameState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
