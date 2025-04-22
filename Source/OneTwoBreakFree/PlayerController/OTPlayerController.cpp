@@ -11,6 +11,11 @@
 #include "OneTwoBreakFree/GameMode/OTMatchGameMode.h"
 #include "Net/UnrealNetwork.h"
 
+AOTPlayerController::AOTPlayerController()
+{
+    
+}
+
 void AOTPlayerController::BeginPlay()
 {
     Super::BeginPlay();
@@ -27,6 +32,17 @@ void AOTPlayerController::BeginPlay()
     OTHUD = Cast<AOTHUD>(GetHUD());
 
     SetInputMode(FInputModeGameOnly());
+}
+
+void AOTPlayerController::Tick(float DeltaTime)
+{
+    Super::Tick(DeltaTime);
+
+    if (MatchState == MatchState::InProgress && MatchStartTimestamp > 0.f)
+    {
+        float ElapsedTime = GetWorld()->GetTimeSeconds() - MatchStartTimestamp;
+        SetHUDMatchTimeFromSeconds(ElapsedTime);
+    }
 }
 
 void AOTPlayerController::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
@@ -174,6 +190,11 @@ void AOTPlayerController::OnRep_MatchState()
 
 void AOTPlayerController::HandleMatchHasStarted()
 {
+    if (IsLocalPlayerController())
+    {
+        MatchStartTimestamp = GetWorld()->GetTimeSeconds();
+    }
+
     if(!OTHUD)
         OTHUD = Cast<AOTHUD>(GetHUD());
 
@@ -186,7 +207,9 @@ void AOTPlayerController::HandleMatchHasStarted()
         if (OTHUD->Announcement == nullptr)
         {
             OTHUD->AddAnnouncement();
-            OTHUD->Announcement->SetVisibility(ESlateVisibility::Hidden);
+            OTHUD->Announcement->ShowAnnouncement(EAnnouncementType::EANMT_MatchStart);
         }
     }
+
+    HideLoadingUI();
 }

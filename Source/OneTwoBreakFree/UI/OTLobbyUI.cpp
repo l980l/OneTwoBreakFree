@@ -186,18 +186,12 @@ void UOTLobbyUI::UpdatePlayerList(const TArray<FLobbyPlayerInfo>& PlayersInfo)
     if (!PlayerListBox)
         return;
 
-    // 기존 목록 초기화
     PlayerListBox->ClearChildren();
 
-    // 호스트 플레이어 여부 확인을 위한 변수
-    bool bIsLocalHost = PlayerController &&
-        PlayerController->IsLocalPlayerController() &&
-        PlayerController->HasAuthority();
+    bool bIsLocalHost = PlayerController && PlayerController->IsLocalPlayerController() && PlayerController->HasAuthority();
 
-    // 각 플레이어에 대한 항목 추가
     for (const FLobbyPlayerInfo& PlayerInfo : PlayersInfo)
     {
-        // 이 플레이어가 호스트인지 확인
         bool bIsHost = false;
         if (PlayerInfo.PlayerController)
         {
@@ -211,7 +205,6 @@ void UOTLobbyUI::UpdatePlayerList(const TArray<FLobbyPlayerInfo>& PlayersInfo)
             bIsHost
         );
 
-        // 생성된 위젯을 목록에 추가
         if (PlayerItem)
         {
             PlayerListBox->AddChild(PlayerItem);

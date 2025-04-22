@@ -130,12 +130,6 @@ void AOTMatchGameMode::StartGame()
     int32 CurrentPlayerCount = GetWorld()->GetNumPlayerControllers();
     UE_LOG(LogTemp, Log, TEXT("Starting game with %d players"), CurrentPlayerCount);
 
-    AOTMatchGameState* MatchGS = GetGameState<AOTMatchGameState>();
-    if (MatchGS)
-    {
-        MatchGS->MulticastOnAllClientsReady();
-    }
-
     AssignPlayerRoles();
 
     TArray<FVector> SpawnLocations = FindPlayerSpawnLocations(CurrentPlayerCount);

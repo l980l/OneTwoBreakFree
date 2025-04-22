@@ -15,7 +15,9 @@ class ONETWOBREAKFREE_API AOTPlayerController : public APlayerController
 	GENERATED_BODY()
 
 public:
+    AOTPlayerController();
     virtual void BeginPlay() override;
+    virtual void Tick(float DeltaTime) override;
     virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
     
     UFUNCTION()
@@ -49,4 +51,6 @@ private:
 
     UPROPERTY()
     TObjectPtr<class UOTLoadingUI> LoadingUI;
+
+    float MatchStartTimestamp = 0.f;
 };

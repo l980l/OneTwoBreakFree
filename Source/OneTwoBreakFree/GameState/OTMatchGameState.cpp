@@ -45,15 +45,3 @@ void AOTMatchGameState::OnRep_PCGRandomSeed()
 		}
 	}
 }
-
-void AOTMatchGameState::MulticastOnAllClientsReady_Implementation()
-{
-	for (FConstPlayerControllerIterator It = GetWorld()->GetPlayerControllerIterator(); It; ++It)
-	{
-		AOTPlayerController* PC = Cast<AOTPlayerController>(It->Get());
-		if (PC)
-		{
-			PC->HideLoadingUI();
-		}
-	}
-}
