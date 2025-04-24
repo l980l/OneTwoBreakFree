@@ -7,6 +7,9 @@
 #include "Components/CapsuleComponent.h"
 #include "OTCharacterMovementComponent.h"
 #include "OneTwoBreakFree/PlayerController/OTPlayerController.h"
+#include "OneTwoBreakFree/Types/AnnouncementType.h"
+#include "OneTwoBreakFree/Character/OTSpectatorPawn.h"
+#include "Kismet/GameplayStatics.h"
 
 AOTCitizenCharacter::AOTCitizenCharacter(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer.SetDefaultSubobjectClass<UOTCharacterMovementComponent>(ACharacter::CharacterMovementComponentName))
@@ -19,7 +22,6 @@ void AOTCitizenCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 
-	// 체력 컴포넌트 이벤트 바인딩
 	if (HealthComponent)
 	{
 		HealthComponent->OnDeath.AddDynamic(this, &AOTCitizenCharacter::OnCharacterDeath);
@@ -49,26 +51,120 @@ void AOTCitizenCharacter::OnCharacterDeath(UOTHealthComponent* HealthComp, AActo
 {
 	GetCharacterMovement()->DisableMovement();
 
-	// 컨트롤러 분리 (서버에서만)
-	/*if (HasAuthority() && GetController())
-	{
-		GetController()->UnPossess();
-	}*/
-
 	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-
 	GetMesh()->SetSimulatePhysics(true);
 	GetMesh()->SetCollisionEnabled(ECollisionEnabled::PhysicsOnly);
+
+	if (IsLocallyControlled())
+	{
+		if (AOTPlayerController* PC = Cast<AOTPlayerController>(Controller))
+		{
+			PC->SetHUDHealth(0.f);
+			PC->ShowAnnouncement(EAnnouncementType::EANMT_Dead);
+		}
+	}
 
 	if (HasAuthority())
 	{
 		SetLifeSpan(10.0f);
-	}
 
+		if (KillerActor)
+		{
+			AOTCharacterBase* KillerCharacter = Cast<AOTCharacterBase>(KillerActor);
+			if (!KillerCharacter)
+			{
+				KillerCharacter = Cast<AOTCharacterBase>(KillerActor->GetOwner());
+			}
+
+			if (KillerCharacter)
+			{
+				AOTPlayerController* KillerPC = Cast<AOTPlayerController>(KillerCharacter->GetController());
+				if (KillerPC)
+				{
+					KillerPC->ClientShowAnnouncement(EAnnouncementType::EANMT_Kill);
+				}
+			}
+		}
+
+		AController* OldController = GetController();
+
+		if (OldController)
+		{
+			OldController->UnPossess();
+
+			FActorSpawnParameters SpawnParams;
+			SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+			SpawnParams.Owner = OldController;
+
+			FVector SpawnLocation = GetActorLocation();
+			FRotator SpawnRotation = GetActorRotation();
+
+			AOTSpectatorPawn* SpectatorPawn = GetWorld()->SpawnActor<AOTSpectatorPawn>(
+				SpectatorPawnClass,
+				SpawnLocation,
+				SpawnRotation,
+				SpawnParams
+			);
+
+			if (SpectatorPawn)
+			{
+				OldController->Possess(SpectatorPawn);
+
+				if (AOTPlayerController* PC = Cast<AOTPlayerController>(OldController))
+				{
+					PC->EnterSpectatorMode();
+				}
+			}
+		}
+	}
+}
+
+void AOTCitizenCharacter::HandleEscape()
+{
 	if (IsLocallyControlled())
 	{
-		// 사망 HUD
-		// HUD 적용, 화면 효과
+		if (AOTPlayerController* PC = Cast<AOTPlayerController>(Controller))
+		{
+			PC->ShowAnnouncement(EAnnouncementType::EANMT_Survive);
+		}
+	}
+
+	if (HasAuthority())
+	{
+		AController* OldController = GetController();
+
+		if (OldController)
+		{
+			OldController->UnPossess();
+
+			FActorSpawnParameters SpawnParams;
+			SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+			SpawnParams.Owner = OldController;
+
+			FVector SpawnLocation = GetActorLocation();
+			FRotator SpawnRotation = GetActorRotation();
+
+			AOTSpectatorPawn* SpectatorPawn = GetWorld()->SpawnActor<AOTSpectatorPawn>(
+				SpectatorPawnClass,
+				SpawnLocation,
+				SpawnRotation,
+				SpawnParams
+			);
+
+			if (SpectatorPawn)
+			{
+				OldController->Possess(SpectatorPawn);
+
+				if (AOTPlayerController* PC = Cast<AOTPlayerController>(OldController))
+				{
+					PC->EnterSpectatorMode();
+				}
+			}
+
+			SetActorHiddenInGame(true);
+			SetActorEnableCollision(false);
+			SetLifeSpan(1.0f);
+		}
 	}
 }
 

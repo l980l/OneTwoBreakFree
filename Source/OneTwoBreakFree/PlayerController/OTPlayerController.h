@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/PlayerController.h"
+#include "OneTwoBreakFree/Types/AnnouncementType.h"
 #include "OTPlayerController.generated.h"
 
 /**
@@ -41,6 +42,22 @@ public:
     void FlashCrosshairRed();
     void FlashHitMarker();
     void HideLoadingUI();
+    void ShowAnnouncement(EAnnouncementType Type);
+
+    UFUNCTION(Client, Reliable)
+    void ClientSetSpectatorUI();
+
+    UFUNCTION(BlueprintCallable, Category = "Spectator")
+    void EnterSpectatorMode();
+
+    UFUNCTION(BlueprintCallable, Category = "Spectator")
+    void SetSpectatingPlayerInfo(const FString& PlayerName);
+
+    UFUNCTION(BlueprintCallable, Category = "Spectator")
+    FORCEINLINE bool IsSpectating() const { return bIsSpectating; }
+
+    UFUNCTION(Client, Reliable)
+    void ClientShowAnnouncement(EAnnouncementType Type);
 
 private:
     UPROPERTY()
@@ -53,4 +70,10 @@ private:
     TObjectPtr<class UOTLoadingUI> LoadingUI;
 
     float MatchStartTimestamp = 0.f;
+
+    UPROPERTY(Replicated)
+    bool bIsSpectating = false;
+
+    UPROPERTY(Replicated)
+    FString SpectatingPlayerName;
 };

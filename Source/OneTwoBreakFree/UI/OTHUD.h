@@ -30,4 +30,12 @@ public:
 	TObjectPtr<class UOTAnnouncementWidget> Announcement;
 
 	void AddAnnouncement();
+
+    UPROPERTY(EditAnywhere, Category = "Widgets")
+    TSubclassOf<class UOTSpectatorUI> SpectatorWidgetClass;
+
+    UPROPERTY()
+    TObjectPtr<class UOTSpectatorUI> SpectatorWidget;
+
+	void AddSpectatorWidget();
 };

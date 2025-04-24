@@ -30,6 +30,9 @@ protected:
     virtual void OnCharacterDeath(class UOTHealthComponent* HealthComp, AActor* KilledActor, AActor* KillerActor);
 
 public:
+    UFUNCTION(BlueprintCallable, Category = "Gameplay")
+    virtual void HandleEscape();
+
     UFUNCTION(BlueprintPure, Category = "Health")
     bool IsAlive() const;
 
@@ -38,4 +41,7 @@ public:
 
     UFUNCTION(BlueprintPure, Category = "Health")
     float GetMaxHealth() const;
+
+    UPROPERTY(EditAnywhere, Category = "Spectator")
+    TSubclassOf<class AOTSpectatorPawn> SpectatorPawnClass;
 };

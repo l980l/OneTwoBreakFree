@@ -5,6 +5,7 @@
 #include "GameFramework/PlayerController.h"
 #include "OTCharacterOverlayWidget.h"
 #include "OTAnnouncementWidget.h"
+#include "OTSpectatorUI.h"
 
 void AOTHUD::AddCharacterOverlay()
 {
@@ -23,5 +24,15 @@ void AOTHUD::AddAnnouncement()
 	{
 		Announcement = CreateWidget<UOTAnnouncementWidget>(PlayerController, AnnouncementClass);
 		Announcement->AddToViewport();
+	}
+}
+
+void AOTHUD::AddSpectatorWidget()
+{
+	APlayerController* PlayerController = GetOwningPlayerController();
+	if (PlayerController && SpectatorWidgetClass)
+	{
+		SpectatorWidget = CreateWidget<UOTSpectatorUI>(PlayerController, SpectatorWidgetClass);
+		SpectatorWidget->AddToViewport();
 	}
 }
