@@ -6,6 +6,7 @@
 #include "OneTwoBreakFree/UI/OTAnnouncementWidget.h"
 #include "OneTwoBreakFree/UI/OTHUD.h"
 #include "OneTwoBreakFree/UI/OTLoadingUI.h"
+#include "OneTwoBreakFree/UI/OTSpectatorUI.h"
 #include "Kismet/GameplayStatics.h"
 #include "OneTwoBreakFree/GameState/OTMatchGameState.h"
 #include "OneTwoBreakFree/GameMode/OTMatchGameMode.h"
@@ -168,6 +169,54 @@ void AOTPlayerController::HideLoadingUI()
     {
         LoadingUI->HideLoadingUI();
     }
+}
+
+void AOTPlayerController::ShowAnnouncement(EAnnouncementType Type)
+{
+    if (!OTHUD)
+        OTHUD = Cast<AOTHUD>(GetHUD());
+    if (OTHUD && OTHUD->Announcement)
+    {
+        OTHUD->Announcement->ShowAnnouncement(Type);
+    }
+}
+
+void AOTPlayerController::ClientSetSpectatorUI_Implementation()
+{
+    if (OTHUD)
+    {
+        OTHUD->AddSpectatorWidget();
+    }
+
+    if (OTHUD && OTHUD->CharacterOverlay)
+    {
+        OTHUD->CharacterOverlay->SetVisibility(ESlateVisibility::Hidden);
+    }
+}
+
+void AOTPlayerController::EnterSpectatorMode()
+{
+    bIsSpectating = true;
+
+    ClientSetSpectatorUI();
+}
+
+void AOTPlayerController::SetSpectatingPlayerInfo(const FString& PlayerName)
+{
+    SpectatingPlayerName = PlayerName;
+
+    if (IsLocalController())
+    {
+        if (OTHUD && OTHUD->SpectatorWidget)
+        {
+            OTHUD->SpectatorWidget->SetTargetNameText(PlayerName);
+        }
+    }
+}
+
+void AOTPlayerController::ClientShowAnnouncement_Implementation(EAnnouncementType Type)
+{
+    this->ShowAnnouncement(Type);
 }
 
 void AOTPlayerController::OnMatchStateSet(FName State)
