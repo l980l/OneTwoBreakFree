@@ -9,6 +9,7 @@
 #include "Components/SplineComponent.h"
 #include "OneTwoBreakFree/GameInstance/OTGameInstance.h"
 #include "GameFramework/PlayerState.h"
+#include "OneTwoBreakFree/Portal/OTPortal.h"
 
 AOTMatchGameMode::AOTMatchGameMode()
 {
@@ -132,9 +133,27 @@ void AOTMatchGameMode::StartGame()
 
     AssignPlayerRoles();
 
-    TArray<FVector> SpawnLocations = FindPlayerSpawnLocations(CurrentPlayerCount);
+    int32 TotalLocationsNeeded = CurrentPlayerCount + PortalCount;
+    TArray<FVector> AllLocations = FindSpawnLocations(TotalLocationsNeeded);
 
-    TeleportPlayersToLocations(SpawnLocations);
+    TArray<FVector> PlayerLocations;
+    TArray<FVector> PortalLocations;
+
+    for (int32 i = 0; i < AllLocations.Num(); i++)
+    {
+        if (i < CurrentPlayerCount)
+        {
+            PlayerLocations.Add(AllLocations[i]);
+        }
+        else
+        {
+            PortalLocations.Add(AllLocations[i]);
+        }
+    }
+
+    TeleportPlayersToLocations(PlayerLocations);
+
+    SpawnPortalsAtLocations(PortalLocations);
     
     StartMatch();
 
@@ -206,7 +225,7 @@ void AOTMatchGameMode::AssignPlayerRoles()
     KillerPlayerController = PlayerControllers[KillerIndex];
 }
 
-TArray<FVector> AOTMatchGameMode::FindPlayerSpawnLocations(int32 CountPlayers)
+TArray<FVector> AOTMatchGameMode::FindSpawnLocations(int32 LocationCount)
 {
     TArray<FVector> SpawnLocations;
     UWorld* World = GetWorld();
@@ -219,7 +238,7 @@ TArray<FVector> AOTMatchGameMode::FindPlayerSpawnLocations(int32 CountPlayers)
     float MapSizeY = MapMax.Y - MapMin.Y;
 
     // 목표 섹터 수 설정 (플레이어 수에 따라 조정)
-    int32 TargetSectorCount = FMath::Max(4, CountPlayers * 2);
+    int32 TargetSectorCount = FMath::Max(4, LocationCount * 2);
 
     // 맵 면적의 제곱근에 기반한 섹터 크기 계산
     float MapArea = MapSizeX * MapSizeY;
@@ -235,12 +254,12 @@ TArray<FVector> AOTMatchGameMode::FindPlayerSpawnLocations(int32 CountPlayers)
     const int32 NumSectorsY = FMath::CeilToInt(MapSizeY / SectorSize);
 
     // 각 섹터에서 플레이어 하나씩 배치 시도 (가능한 경우)
-    int32 PlayersRemaining = CountPlayers;
+    int32 RemainingCount = LocationCount;
     int32 AttemptsPerSector = FMath::Max(5, MaxSpawnAttempts / (NumSectorsX * NumSectorsY));
 
-    for (int32 SectorX = 0; SectorX < NumSectorsX && PlayersRemaining > 0; SectorX++)
+    for (int32 SectorX = 0; SectorX < NumSectorsX && RemainingCount > 0; SectorX++)
     {
-        for (int32 SectorY = 0; SectorY < NumSectorsY && PlayersRemaining > 0; SectorY++)
+        for (int32 SectorY = 0; SectorY < NumSectorsY && RemainingCount > 0; SectorY++)
         {
             // 섹터 경계 계산
             float MinX = MapMin.X + SectorX * SectorSize;
@@ -279,7 +298,7 @@ TArray<FVector> AOTMatchGameMode::FindPlayerSpawnLocations(int32 CountPlayers)
                     if (IsValidSpawnLocation(PotentialLocation, SpawnLocations))
                     {
                         SpawnLocations.Add(PotentialLocation);
-                        PlayersRemaining--;
+                        RemainingCount--;
                         UE_LOG(LogTemp, Log, TEXT("Found spawn location at: (%f, %f, %f)"), PotentialLocation.X, PotentialLocation.Y, PotentialLocation.Z);
                         break;
                     }
@@ -288,9 +307,9 @@ TArray<FVector> AOTMatchGameMode::FindPlayerSpawnLocations(int32 CountPlayers)
         }
     }
 
-    if (SpawnLocations.Num() < CountPlayers)
+    if (SpawnLocations.Num() < LocationCount)
     {
-        UE_LOG(LogTemp, Error, TEXT("Could not find enough spawn locations. Found: %d, Needed: %d"), SpawnLocations.Num(), CountPlayers);
+        UE_LOG(LogTemp, Error, TEXT("Could not find enough spawn locations. Found: %d, Needed: %d"), SpawnLocations.Num(), LocationCount);
     }
 
     return SpawnLocations;
@@ -375,5 +394,23 @@ void AOTMatchGameMode::TeleportPlayersToLocations(const TArray<FVector>& Locatio
 
             LocationIndex++;
         }
+    }
+}
+
+void AOTMatchGameMode::SpawnPortalsAtLocations(const TArray<FVector>& Locations)
+{
+    ensureMsgf(PortalClass, TEXT("Portal Class is not set!"));
+
+    for (const FVector& Location : Locations)
+    {
+        FActorSpawnParameters SpawnParams;
+        SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
+
+        AOTPortal* Portal = GetWorld()->SpawnActor<AOTPortal>(
+            PortalClass,
+            Location,
+            FRotator::ZeroRotator,
+            SpawnParams
+        );
     }
 }
