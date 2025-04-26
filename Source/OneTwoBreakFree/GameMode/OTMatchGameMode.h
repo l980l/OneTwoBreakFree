@@ -11,6 +11,7 @@
  * 
  */
 class UPCGComponent;
+class AOTPortal;
 
 UCLASS()
 class ONETWOBREAKFREE_API AOTMatchGameMode : public AGameMode
@@ -47,6 +48,9 @@ public:
     UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Game")
     int32 MaxPlayers = 4;
 
+    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Game")
+    int32 PortalCount = 4;
+
     UPROPERTY(Transient)
     FVector MapMin;
 
@@ -62,6 +66,9 @@ public:
     UPROPERTY(EditDefaultsOnly, Category = "Character")
     TSubclassOf<AOTCharacterBase> CitizenCharacterClass;
 
+    UPROPERTY(EditDefaultsOnly, Category = "Portal")
+    TSubclassOf<AOTPortal> PortalClass;
+
 private:
     virtual void BeginPlay() override;
     virtual void PostLogin(APlayerController* NewPlayer) override;
@@ -71,9 +78,10 @@ private:
     void CheckAndStartGameIfReady();
     void CalculateMapBounds();
     void AssignPlayerRoles();
-    TArray<FVector> FindPlayerSpawnLocations(int32 CountPlayers);
+    TArray<FVector> FindSpawnLocations(int32 LocationCount);
     bool IsValidSpawnLocation(const FVector& Location, const TArray<FVector>& ExistingLocations);
     void TeleportPlayersToLocations(const TArray<FVector>& Locations);
+    void SpawnPortalsAtLocations(const TArray<FVector>& Locations);
 
     bool bIsMapGenerated = false;
 
