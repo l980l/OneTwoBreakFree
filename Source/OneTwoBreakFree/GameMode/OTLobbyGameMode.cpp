@@ -13,6 +13,19 @@ void AOTLobbyGameMode::PostLogin(APlayerController* NewPlayer)
     if (!NewPlayer)
         return;
 
+    if (NewPlayer && NewPlayer->PlayerState)
+    {
+        UOTGameInstance* GI = Cast<UOTGameInstance>(GetGameInstance());
+        if (GI)
+        {
+            FString SavedName;
+            if (GI->GetSavedPlayerName(NewPlayer->PlayerState->GetUniqueId(), SavedName))
+            {
+                NewPlayer->PlayerState->SetPlayerName(SavedName);
+            }
+        }
+    }
+
     FLobbyPlayerInfo NewPlayerInfo;
     NewPlayerInfo.PlayerController = NewPlayer;
 

@@ -61,7 +61,6 @@ protected:
 
 	void SwitchToPreviousTarget();
 
-	// 쿨다운 후 타겟 전환 활성화
 	void EnableTargetSwitch();
 
 	void UpdateTargetTracking(float DeltaTime);

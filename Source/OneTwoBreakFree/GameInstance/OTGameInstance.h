@@ -19,4 +19,11 @@ public:
 
     UPROPERTY()
     int32 PlayerCount;
+
+    void SavePlayerName(const FUniqueNetIdRepl& PlayerId, const FString& PlayerName);
+    bool GetSavedPlayerName(const FUniqueNetIdRepl& PlayerId, FString& OutPlayerName);
+
+private:
+    UPROPERTY()
+    TMap<FString, FString> PlayerNameMap;
 };

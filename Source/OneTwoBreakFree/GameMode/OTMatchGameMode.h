@@ -27,6 +27,9 @@ public:
     UFUNCTION(BlueprintCallable, Category = "PCG")
     void StartPCGMapGeneration();
 
+    void CheckGameEndCondition();
+    void EndGame();
+
     UPROPERTY(EditDefaultsOnly, Category = "PCG")
     TSubclassOf<AActor> PCGBackroomsActorClass;
 
@@ -69,6 +72,12 @@ public:
     UPROPERTY(EditDefaultsOnly, Category = "Portal")
     TSubclassOf<AOTPortal> PortalClass;
 
+    UPROPERTY(EditDefaultsOnly, Category = "Game")
+    float ResultsScreenDuration = 10.0f;
+
+    UPROPERTY(EditDefaultsOnly, Category = "Game")
+    FName LobbyLevelName = FName("Lobby");
+
 private:
     virtual void BeginPlay() override;
     virtual void PostLogin(APlayerController* NewPlayer) override;
@@ -82,8 +91,14 @@ private:
     bool IsValidSpawnLocation(const FVector& Location, const TArray<FVector>& ExistingLocations);
     void TeleportPlayersToLocations(const TArray<FVector>& Locations);
     void SpawnPortalsAtLocations(const TArray<FVector>& Locations);
+    void ShowResultsScreen();
+    void ReturnToLobby();
+    void BroadcastGameEndingSoon();
 
     bool bIsMapGenerated = false;
+
+    FTimerHandle GameEndTimerHandle;
+    bool bIsGameEnding = false;
 
     friend class AOTMatchGameState;
 };

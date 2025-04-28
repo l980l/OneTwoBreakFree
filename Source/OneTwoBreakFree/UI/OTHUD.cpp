@@ -6,6 +6,7 @@
 #include "OTCharacterOverlayWidget.h"
 #include "OTAnnouncementWidget.h"
 #include "OTSpectatorUI.h"
+#include "OTGameResultsWidget.h"
 
 void AOTHUD::AddCharacterOverlay()
 {
@@ -34,5 +35,15 @@ void AOTHUD::AddSpectatorWidget()
 	{
 		SpectatorWidget = CreateWidget<UOTSpectatorUI>(PlayerController, SpectatorWidgetClass);
 		SpectatorWidget->AddToViewport();
+	}
+}
+
+void AOTHUD::AddGameResultsWidget()
+{
+	APlayerController* PlayerController = GetOwningPlayerController();
+	if (PlayerController && GameResultsWidgetClass)
+	{
+		GameResultsWidget = CreateWidget<UOTGameResultsWidget>(PlayerController, GameResultsWidgetClass);
+		GameResultsWidget->AddToViewport();
 	}
 }

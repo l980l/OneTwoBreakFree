@@ -7,15 +7,11 @@
 #include "OneTwoBreakFree/UI/OTHUD.h"
 #include "OneTwoBreakFree/UI/OTLoadingUI.h"
 #include "OneTwoBreakFree/UI/OTSpectatorUI.h"
+#include "OneTwoBreakFree/UI/OTGameResultsWidget.h"
 #include "Kismet/GameplayStatics.h"
 #include "OneTwoBreakFree/GameState/OTMatchGameState.h"
 #include "OneTwoBreakFree/GameMode/OTMatchGameMode.h"
 #include "Net/UnrealNetwork.h"
-
-AOTPlayerController::AOTPlayerController()
-{
-    
-}
 
 void AOTPlayerController::BeginPlay()
 {
@@ -171,13 +167,13 @@ void AOTPlayerController::HideLoadingUI()
     }
 }
 
-void AOTPlayerController::ShowAnnouncement(EAnnouncementType Type)
+void AOTPlayerController::ShowAnnouncement(EAnnouncementType Type, float ShowTime)
 {
     if (!OTHUD)
         OTHUD = Cast<AOTHUD>(GetHUD());
     if (OTHUD && OTHUD->Announcement)
     {
-        OTHUD->Announcement->ShowAnnouncement(Type);
+        OTHUD->Announcement->ShowAnnouncement(Type, ShowTime);
     }
 }
 
@@ -214,9 +210,35 @@ void AOTPlayerController::SetSpectatingPlayerInfo(const FString& PlayerName)
     }
 }
 
-void AOTPlayerController::ClientShowAnnouncement_Implementation(EAnnouncementType Type)
+void AOTPlayerController::ClientShowGameResults_Implementation()
 {
-    this->ShowAnnouncement(Type);
+    if (OTHUD && OTHUD->CharacterOverlay)
+    {
+        OTHUD->CharacterOverlay->SetVisibility(ESlateVisibility::Hidden);
+    }
+
+    if (OTHUD && OTHUD->Announcement)
+    {
+        OTHUD->Announcement->SetVisibility(ESlateVisibility::Hidden);
+    }
+
+    if (OTHUD && OTHUD->SpectatorWidget)
+    {
+        OTHUD->SpectatorWidget->SetVisibility(ESlateVisibility::Hidden);
+    }
+
+    if (OTHUD)
+    {
+        OTHUD->AddGameResultsWidget();
+    }
+
+    SetInputMode(FInputModeUIOnly());
+    SetShowMouseCursor(true);
+}
+
+void AOTPlayerController::ClientShowAnnouncement_Implementation(EAnnouncementType Type, float ShowTime)
+{
+    this->ShowAnnouncement(Type, ShowTime);
 }
 
 void AOTPlayerController::OnMatchStateSet(FName State)

@@ -33,4 +33,6 @@ public:
 
 private:
 	void ShowAnnouncementText(bool bShow);
+
+	FTimerHandle HideWidgetTimerHandle;
 };

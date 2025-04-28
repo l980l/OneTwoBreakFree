@@ -16,7 +16,6 @@ class ONETWOBREAKFREE_API AOTPlayerController : public APlayerController
 	GENERATED_BODY()
 
 public:
-    AOTPlayerController();
     virtual void BeginPlay() override;
     virtual void Tick(float DeltaTime) override;
     virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
@@ -42,7 +41,7 @@ public:
     void FlashCrosshairRed();
     void FlashHitMarker();
     void HideLoadingUI();
-    void ShowAnnouncement(EAnnouncementType Type);
+    void ShowAnnouncement(EAnnouncementType Type, float ShowTime = 3.f);
 
     UFUNCTION(Client, Reliable)
     void ClientSetSpectatorUI();
@@ -57,13 +56,16 @@ public:
     FORCEINLINE bool IsSpectating() const { return bIsSpectating; }
 
     UFUNCTION(Client, Reliable)
-    void ClientShowAnnouncement(EAnnouncementType Type);
+    void ClientShowAnnouncement(EAnnouncementType Type, float ShowTime = 3.f);
+
+    UFUNCTION(Client, Reliable)
+    void ClientShowGameResults();
 
 private:
     UPROPERTY()
     TObjectPtr<class AOTHUD> OTHUD;
 
-    UPROPERTY(EditAnywhere, Category = "Widgets")
+    UPROPERTY(EditAnywhere, Category = "UI")
     TSubclassOf<class UOTLoadingUI> LoadingUIClass;
 
     UPROPERTY()

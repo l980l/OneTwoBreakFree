@@ -4,12 +4,15 @@
 #include "PCGComponent.h"
 #include "OneTwoBreakFree/GameState/OTMatchGameState.h"
 #include "OneTwoBreakFree/PlayerController/OTPlayerController.h"
+#include "OneTwoBreakFree/Character/OTCitizenCharacter.h"
+#include "OneTwoBreakFree/Character/OTKillerCharacter.h"
 #include "Net/UnrealNetwork.h"
 #include "Kismet/GameplayStatics.h"
 #include "Components/SplineComponent.h"
 #include "OneTwoBreakFree/GameInstance/OTGameInstance.h"
 #include "GameFramework/PlayerState.h"
 #include "OneTwoBreakFree/Portal/OTPortal.h"
+#include "OneTwoBreakFree/PlayerState/OTPlayerState.h"
 
 AOTMatchGameMode::AOTMatchGameMode()
 {
@@ -26,6 +29,11 @@ void AOTMatchGameMode::BeginPlay()
         MaxPlayers = GameInstance->PlayerCount;
     }
 
+    if (AOTMatchGameState* GS = GetGameState<AOTMatchGameState>())
+    {
+        GS->ResultsScreenDuration = ResultsScreenDuration;
+    }
+
 	StartPCGMapGeneration();
 }
 
@@ -36,6 +44,19 @@ void AOTMatchGameMode::PostLogin(APlayerController* NewPlayer)
     int32 CurrentPlayerCount = GetWorld()->GetNumPlayerControllers();
 
     UE_LOG(LogTemp, Log, TEXT("Player joined: %s. Current count: %d/%d"), *NewPlayer->GetName(), CurrentPlayerCount, MaxPlayers);
+
+    if (NewPlayer && NewPlayer->PlayerState)
+    {
+        UOTGameInstance* GI = Cast<UOTGameInstance>(GetGameInstance());
+        if (GI)
+        {
+            FString SavedName;
+            if (GI->GetSavedPlayerName(NewPlayer->PlayerState->GetUniqueId(), SavedName))
+            {
+                NewPlayer->PlayerState->SetPlayerName(SavedName);
+            }
+        }
+    }
 
     CheckAndStartGameIfReady();
 }
@@ -64,8 +85,7 @@ void AOTMatchGameMode::StartPCGMapGeneration()
 
 	int32 PCGRandomSeed = FMath::RandRange(1, 999999);
 
-	AOTMatchGameState* MatchGS = GetGameState<AOTMatchGameState>();
-	if (MatchGS)
+	if (AOTMatchGameState* MatchGS = GetGameState<AOTMatchGameState>())
 	{
 		MatchGS->PCGRandomSeed = PCGRandomSeed;
 	}
@@ -412,5 +432,118 @@ void AOTMatchGameMode::SpawnPortalsAtLocations(const TArray<FVector>& Locations)
             FRotator::ZeroRotator,
             SpawnParams
         );
+    }
+}
+
+void AOTMatchGameMode::CheckGameEndCondition()
+{
+    if (bIsGameEnding)
+        return;
+
+    int32 AlivePlayersCount = 0;
+    int32 EscapedCount = 0;
+
+    for (FConstPlayerControllerIterator It = GetWorld()->GetPlayerControllerIterator(); It; ++It)
+    {
+        APlayerController* PC = It->Get();
+        if (PC && PC != KillerPlayerController)
+        {
+            AOTPlayerState* PS = PC->GetPlayerState<AOTPlayerState>();
+            if (PS)
+            {
+                if (PS->IsCitizen())
+                {
+                    if (PS->HasEscaped())
+                    {
+                        EscapedCount++;
+                    }
+                    else if (!PS->IsDead())
+                    {
+                        AlivePlayersCount++;
+                    }
+                }
+            }
+        }
+    }
+
+    if (AlivePlayersCount == 0)
+    {
+        bIsGameEnding = true;
+
+        const float EndGameDelay = 3.0f;
+
+        FTimerHandle EndGameTimerHandle;
+        GetWorldTimerManager().SetTimer(
+            EndGameTimerHandle,
+            this,
+            &AOTMatchGameMode::EndGame,
+            EndGameDelay,
+            false  
+        );
+
+        BroadcastGameEndingSoon();
+    }
+}
+
+void AOTMatchGameMode::BroadcastGameEndingSoon()
+{
+    for (FConstPlayerControllerIterator It = GetWorld()->GetPlayerControllerIterator(); It; ++It)
+    {
+        APlayerController* PC = It->Get();
+        if (PC)
+        {
+            AOTPlayerController* OTPC = Cast<AOTPlayerController>(PC);
+            if (OTPC)
+            {
+                OTPC->ClientShowAnnouncement(EAnnouncementType::EANMT_MatchEnd, 2.f);
+            }
+        }
+    }
+}
+
+void AOTMatchGameMode::EndGame()
+{
+    ShowResultsScreen();
+
+    GetWorldTimerManager().SetTimer(
+        GameEndTimerHandle,
+        this,
+        &AOTMatchGameMode::ReturnToLobby,
+        ResultsScreenDuration,
+        false
+    );
+}
+
+void AOTMatchGameMode::ShowResultsScreen()
+{
+    for (FConstPlayerControllerIterator It = GetWorld()->GetPlayerControllerIterator(); It; ++It)
+    {
+        AOTPlayerController* PC = Cast<AOTPlayerController>(It->Get());
+        if (PC)
+        {
+            PC->ClientShowGameResults();
+            
+            if (PC == KillerPlayerController)
+            {
+                APawn* ControlledPawn = PC->GetPawn();
+                if (ControlledPawn)
+                {
+                    PC->UnPossess();
+
+                    ControlledPawn->Destroy();
+                }
+            }
+        }
+    }
+}
+
+void AOTMatchGameMode::ReturnToLobby()
+{
+    UWorld* World = GetWorld();
+    if (World)
+    {
+        bUseSeamlessTravel = true;
+        const FString URL = TEXT("/Game/Levels/") + LobbyLevelName.ToString() + TEXT("?listen");
+        World->ServerTravel(URL);
     }
 }

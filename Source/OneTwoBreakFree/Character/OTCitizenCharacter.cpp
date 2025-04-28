@@ -7,6 +7,8 @@
 #include "Components/CapsuleComponent.h"
 #include "OTCharacterMovementComponent.h"
 #include "OneTwoBreakFree/PlayerController/OTPlayerController.h"
+#include "OneTwoBreakFree/GameMode/OTMatchGameMode.h"
+#include "OneTwoBreakFree/PlayerState/OTPlayerState.h"
 #include "OneTwoBreakFree/Types/AnnouncementType.h"
 #include "OneTwoBreakFree/Character/OTSpectatorPawn.h"
 #include "Kismet/GameplayStatics.h"
@@ -68,6 +70,12 @@ void AOTCitizenCharacter::OnCharacterDeath(UOTHealthComponent* HealthComp, AActo
 	{
 		SetLifeSpan(10.0f);
 
+		AOTPlayerState* PS = GetPlayerState<AOTPlayerState>();
+		if (PS)
+		{
+			PS->DeathTime = GetWorld()->GetTimeSeconds();
+		}
+
 		if (KillerActor)
 		{
 			AOTCharacterBase* KillerCharacter = Cast<AOTCharacterBase>(KillerActor);
@@ -78,6 +86,12 @@ void AOTCitizenCharacter::OnCharacterDeath(UOTHealthComponent* HealthComp, AActo
 
 			if (KillerCharacter)
 			{
+				AOTPlayerState* KillerPS = KillerCharacter->GetPlayerState<AOTPlayerState>();
+				if (KillerPS && KillerPS->IsKiller())
+				{
+					KillerPS->KillCount++;
+				}
+
 				AOTPlayerController* KillerPC = Cast<AOTPlayerController>(KillerCharacter->GetController());
 				if (KillerPC)
 				{
@@ -116,6 +130,11 @@ void AOTCitizenCharacter::OnCharacterDeath(UOTHealthComponent* HealthComp, AActo
 				}
 			}
 		}
+
+		if (AOTMatchGameMode* GameMode = Cast<AOTMatchGameMode>(GetWorld()->GetAuthGameMode()))
+		{
+			GameMode->CheckGameEndCondition();
+		}
 	}
 }
 
@@ -131,6 +150,12 @@ void AOTCitizenCharacter::HandleEscape()
 
 	if (HasAuthority())
 	{
+		AOTPlayerState* PS = GetPlayerState<AOTPlayerState>();
+		if (PS)
+		{
+			PS->EscapeTime = GetWorld()->GetTimeSeconds();
+		}
+
 		AController* OldController = GetController();
 
 		if (OldController)
@@ -164,6 +189,11 @@ void AOTCitizenCharacter::HandleEscape()
 			SetActorHiddenInGame(true);
 			SetActorEnableCollision(false);
 			SetLifeSpan(1.0f);
+		}
+
+		if (AOTMatchGameMode* GameMode = Cast<AOTMatchGameMode>(GetWorld()->GetAuthGameMode()))
+		{
+			GameMode->CheckGameEndCondition();
 		}
 	}
 }
