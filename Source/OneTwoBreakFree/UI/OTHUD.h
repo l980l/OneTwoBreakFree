@@ -38,4 +38,12 @@ public:
     TObjectPtr<class UOTSpectatorUI> SpectatorWidget;
 
 	void AddSpectatorWidget();
+
+	UPROPERTY(EditAnywhere, Category = "Widgets")
+	TSubclassOf<class UOTGameResultsWidget> GameResultsWidgetClass;
+
+	UPROPERTY()
+	TObjectPtr<class UOTGameResultsWidget> GameResultsWidget;
+
+	void AddGameResultsWidget();
 };

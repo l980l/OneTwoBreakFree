@@ -5,16 +5,8 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
 #include "InputActionValue.h"
+#include "OneTwoBreakFree/Types/CharacterRoleTypes.h"
 #include "OTCharacterBase.generated.h"
-
-UENUM(BlueprintType)
-enum class EOTCharacterRole : uint8
-{
-    ECR_None        UMETA(DisplayName = "None"),
-    ECR_Killer      UMETA(DisplayName = "Killer"),
-    ECR_Citizen     UMETA(DisplayName = "Citizen"),
-    ECR_Spectator   UMETA(DisplayName = "Spectator")
-};
 
 UCLASS()
 class ONETWOBREAKFREE_API AOTCharacterBase : public ACharacter

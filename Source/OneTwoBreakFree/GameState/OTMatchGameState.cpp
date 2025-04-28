@@ -14,6 +14,7 @@ void AOTMatchGameState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& Ou
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
 	DOREPLIFETIME(AOTMatchGameState, PCGRandomSeed);
+	DOREPLIFETIME(AOTMatchGameState, ResultsScreenDuration);
 }
 
 void AOTMatchGameState::OnRep_PCGRandomSeed()

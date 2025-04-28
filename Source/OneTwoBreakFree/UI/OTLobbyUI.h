@@ -13,6 +13,7 @@ class UVerticalBox;
 class UEditableTextBox;
 class AOTLobbyPlayerController;
 class UBorder;
+class UOTLobbyPlayerItem;
 
 /**
  * 
@@ -68,10 +69,10 @@ public:
 	void SetLoadingUIVisible();
 
 	UFUNCTION(Category = "Lobby")
-	class UUserWidget* CreatePlayerListItem(const FString& PlayerName, bool bIsReady, bool bIsHost);
+	UUserWidget* CreatePlayerListItem(const FString& PlayerName, bool bIsReady, bool bIsHost);
 
 	UPROPERTY(EditDefaultsOnly, Category = "UI")
-	TSubclassOf<UUserWidget> PlayerListItemClass;
+	TSubclassOf<UOTLobbyPlayerItem> PlayerListItemClass;
 
 private:
 	UFUNCTION()

@@ -5,6 +5,7 @@
 #include "OneTwoBreakFree/GameMode/OTLobbyGameMode.h"
 #include "Net/UnrealNetwork.h"
 #include "OneTwoBreakFree/UI/OTLobbyHUD.h"
+#include "OneTwoBreakFree/GameInstance/OTGameInstance.h"
 #include "OneTwoBreakFree/UI/OTLobbyUI.h"
 #include "GameFramework/PlayerState.h"
 
@@ -100,6 +101,12 @@ void AOTLobbyPlayerController::ServerSetPlayerName_Implementation(const FString&
     if (PlayerState)
     {
         PlayerState->SetPlayerName(NewName);
+
+        UOTGameInstance* GI = Cast<UOTGameInstance>(GetGameInstance());
+        if (GI)
+        {
+            GI->SavePlayerName(PlayerState->GetUniqueId(), NewName);
+        }
     }
 
     AOTLobbyGameMode* LobbyGameMode = GetWorld()->GetAuthGameMode<AOTLobbyGameMode>();

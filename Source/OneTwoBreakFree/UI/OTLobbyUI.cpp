@@ -198,7 +198,6 @@ void UOTLobbyUI::UpdatePlayerList(const TArray<FLobbyPlayerInfo>& PlayersInfo)
             bIsHost = bIsLocalHost && (PlayerInfo.PlayerController == PlayerController);
         }
 
-        // 블루프린트 구현 이벤트를 통해 플레이어 항목 위젯 생성
         UUserWidget* PlayerItem = CreatePlayerListItem(
             PlayerInfo.PlayerName,
             PlayerInfo.bIsReadyForMatch,

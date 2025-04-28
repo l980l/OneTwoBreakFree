@@ -25,6 +25,9 @@ public:
 	UPROPERTY(EditDefaultsOnly, Category = "PCG")
 	TSubclassOf<AActor> PCGBackroomsActorClass;
 
+	UPROPERTY(Replicated)
+	float ResultsScreenDuration;
+
 protected:
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 };

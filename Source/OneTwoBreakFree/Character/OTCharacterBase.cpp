@@ -10,6 +10,7 @@
 #include "GameFramework/SpringArmComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "OneTwoBreakFree/PlayerController/OTPlayerController.h"
+#include "OneTwoBreakFree/PlayerState/OTPlayerState.h"
 #include "OTCharacterMovementComponent.h"
 #include "Kismet/KismetSystemLibrary.h"
 #include "Engine/StaticMeshActor.h"
@@ -86,6 +87,12 @@ void AOTCharacterBase::BeginPlay()
 void AOTCharacterBase::PossessedBy(AController* NewController)
 {
 	Super::PossessedBy(NewController);
+
+	AOTPlayerState* PS = GetPlayerState<AOTPlayerState>();
+	if (PS)
+	{
+		PS->CharacterRole = CharacterRole;
+	}
 
 	if (IsLocallyControlled())
 	{

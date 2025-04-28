@@ -28,7 +28,7 @@ void UOTAnnouncementWidget::ShowAnnouncement(EAnnouncementType Type, float ShowT
         TextColor = FSlateColor(FLinearColor(1.0f, 0.0f, 0.0f));
         break;
     case EAnnouncementType::EANMT_MatchEnd:
-        AnnouncementMessage = TEXT("Match End");
+        AnnouncementMessage = TEXT("Match End!");
         TextColor = FSlateColor(FLinearColor(1.0f, 1.0f, 0.0f));
         break;
     default:
@@ -52,9 +52,8 @@ void UOTAnnouncementWidget::ShowAnnouncement(EAnnouncementType Type, float ShowT
 
         ShowAnnouncementText(true);
 
-        FTimerHandle TimerHandle;
         GetWorld()->GetTimerManager().SetTimer(
-            TimerHandle,
+            HideWidgetTimerHandle,
             [this]() { ShowAnnouncementText(false); },
             ShowTime,
             false
