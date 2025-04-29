@@ -21,6 +21,9 @@ public:
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
 protected:
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Camera")
+	TObjectPtr<class UCameraComponent> Camera;
+
 	UPROPERTY(Replicated, BlueprintReadOnly, Category = "Spectator")
 	TObjectPtr<AActor> SpectatingTarget;
 

@@ -26,6 +26,10 @@ AOTSpectatorPawn::AOTSpectatorPawn()
 	{
 		SpectatorMovement->MaxSpeed = 0.f;
 	}
+
+	Camera = CreateDefaultSubobject<UCameraComponent>(TEXT("Camera"));
+	Camera->SetupAttachment(GetRootComponent());
+	Camera->bUsePawnControlRotation = false;
 }
 
 void AOTSpectatorPawn::BeginPlay()
@@ -253,18 +257,6 @@ void AOTSpectatorPawn::UpdateTargetTracking(float DeltaTime)
 
 			SetActorLocationAndRotation(NewLocation, NewRotation);
 
-			if (Controller)
-			{
-				FRotator ControllerRotation = Controller->GetControlRotation();
-				FRotator NewControllerRotation = FMath::RInterpTo(
-					ControllerRotation,
-					TargetRotation,
-					DeltaTime,
-					RotationInterpolationSpeed
-				);
-				Controller->SetControlRotation(NewControllerRotation);
-			}
-
 			if (AOTPlayerController* PC = Cast<AOTPlayerController>(Controller))
 			{
 				if (TargetCharacter->GetPlayerState())
@@ -346,10 +338,13 @@ void AOTSpectatorPawn::MulticastToggleFreeCameraMode_Implementation(bool bNewFre
 	{
 		if (bNewFreeCameraMode)
 		{
+			Camera->bUsePawnControlRotation = true;
 			SpectatorMovement->MaxSpeed = 1000.f;
 		}
 		else
 		{
+			Camera->bUsePawnControlRotation = false;
+			Camera->SetRelativeRotation(FRotator::ZeroRotator);
 			SpectatorMovement->MaxSpeed = 0.f;
 		}
 	}
