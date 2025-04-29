@@ -405,7 +405,7 @@ void AOTMatchGameMode::TeleportPlayersToLocations(const TArray<FVector>& Locatio
                 DefaultPawnClass = CitizenCharacterClass;
             }
 
-            // RestartPlayerAtTransform(PC, FTransform(SpawnLocation));
+            //RestartPlayerAtTransform(PC, FTransform(SpawnLocation));
             RestartPlayerAtTransform(PC, FTransform(FVector(-100, 100, 120)));
 
             DefaultPawnClass = OriginalDefaultPawnClass;

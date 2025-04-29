@@ -56,6 +56,9 @@ protected:
 	UPROPERTY(EditDefaultsOnly, Category = "Sound")
 	TObjectPtr<USoundBase> ExplosionSound;
 
+	UPROPERTY(EditDefaultsOnly, Category = "Audio")
+	TObjectPtr<USoundBase> DestructSound;
+
 	UPROPERTY(EditDefaultsOnly, Category = "Projectile")
 	float Damage;
 

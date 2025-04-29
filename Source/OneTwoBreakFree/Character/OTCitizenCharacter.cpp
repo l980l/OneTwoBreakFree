@@ -10,7 +10,9 @@
 #include "OneTwoBreakFree/GameMode/OTMatchGameMode.h"
 #include "OneTwoBreakFree/PlayerState/OTPlayerState.h"
 #include "OneTwoBreakFree/Types/AnnouncementType.h"
+#include "OneTwoBreakFree/Character/OTKillerCharacter.h"
 #include "OneTwoBreakFree/Character/OTSpectatorPawn.h"
+#include "Kismet/GameplayStatics.h"
 
 AOTCitizenCharacter::AOTCitizenCharacter(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer.SetDefaultSubobjectClass<UOTCharacterMovementComponent>(ACharacter::CharacterMovementComponentName))
@@ -32,14 +34,13 @@ void AOTCitizenCharacter::BeginPlay()
 
 void AOTCitizenCharacter::OnHealthChanged(UOTHealthComponent* HealthComp, float Health, float HealthDelta)
 {
-	// 체력 변화시 실행될 로직
-	// 여기서는 아무것도 하지 않지만 필요에 따라 확장 가능
-	// 
-	// 애니메이션 재생, 사운드
-
 	if (IsLocallyControlled())
 	{
-		// HUD 적용, 화면 효과
+		if (DamagedSound)
+		{
+			UGameplayStatics::PlaySound2D(this, DamagedSound);
+		}
+
 		if (AOTPlayerController* PC = Cast<AOTPlayerController>(Controller))
 		{
 			PC->SetHUDHealth(Health / GetMaxHealth());
@@ -58,6 +59,11 @@ void AOTCitizenCharacter::OnCharacterDeath(UOTHealthComponent* HealthComp, AActo
 
 	if (IsLocallyControlled())
 	{
+		if (DeadSound)
+		{
+			UGameplayStatics::PlaySound2D(this, DeadSound);
+		}
+
 		if (AOTPlayerController* PC = Cast<AOTPlayerController>(Controller))
 		{
 			PC->SetHUDHealth(0.f);
@@ -77,14 +83,16 @@ void AOTCitizenCharacter::OnCharacterDeath(UOTHealthComponent* HealthComp, AActo
 
 		if (KillerActor)
 		{
-			AOTCharacterBase* KillerCharacter = Cast<AOTCharacterBase>(KillerActor);
+			AOTKillerCharacter* KillerCharacter = Cast<AOTKillerCharacter>(KillerActor);
 			if (!KillerCharacter)
 			{
-				KillerCharacter = Cast<AOTCharacterBase>(KillerActor->GetOwner());
+				KillerCharacter = Cast<AOTKillerCharacter>(KillerActor->GetOwner());
 			}
 
 			if (KillerCharacter)
 			{
+				KillerCharacter->ClientPlayKillSound();
+
 				AOTPlayerState* KillerPS = KillerCharacter->GetPlayerState<AOTPlayerState>();
 				if (KillerPS && KillerPS->IsKiller())
 				{
@@ -141,6 +149,11 @@ void AOTCitizenCharacter::HandleEscape()
 {
 	if (IsLocallyControlled())
 	{
+		if (EscapeSound)
+		{
+			UGameplayStatics::PlaySound2D(this, EscapeSound);
+		}
+
 		if (AOTPlayerController* PC = Cast<AOTPlayerController>(Controller))
 		{
 			PC->ShowAnnouncement(EAnnouncementType::EANMT_Survive);

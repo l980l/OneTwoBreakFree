@@ -7,6 +7,7 @@
 #include "Net/UnrealNetwork.h"
 #include "Camera/CameraComponent.h"
 #include "Components/CapsuleComponent.h"
+#include "Components/AudioComponent.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "OneTwoBreakFree/PlayerController/OTPlayerController.h"
@@ -66,6 +67,8 @@ AOTCharacterBase::AOTCharacterBase(const FObjectInitializer& ObjectInitializer)
 	GetMesh()->SetRelativeLocation(FVector(0.0f, 0.0f, -96.0f));
 	GetMesh()->SetRelativeRotation(FRotator(0.0f, -90.0f, 0.0f));
 	GetMesh()->SetOwnerNoSee(true);
+
+	BGMAudioComponent = nullptr;
 }
 
 void AOTCharacterBase::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
@@ -150,6 +153,16 @@ void AOTCharacterBase::PossessedBy(AController* NewController)
 	if (IsLocallyControlled())
 	{
 		SetupThirdPersonMesh();
+
+		if (BGM && !BGMAudioComponent)
+		{
+			BGMAudioComponent = UGameplayStatics::CreateSound2D(this, BGM, 1.0f, 1.0f, 0.0f, nullptr, true);
+
+			if (BGMAudioComponent)
+			{
+				BGMAudioComponent->Play();
+			}
+		}
 	}
 }
 
@@ -158,6 +171,16 @@ void AOTCharacterBase::OnRep_Controller()
 	Super::OnRep_Controller();
 
 	SetupThirdPersonMesh();
+
+	if (BGM && !BGMAudioComponent)
+	{
+		BGMAudioComponent = UGameplayStatics::CreateSound2D(this, BGM, 1.0f, 1.0f, 0.0f, nullptr, true);
+
+		if (BGMAudioComponent)
+		{
+			BGMAudioComponent->Play();
+		}
+	}
 }
 
 void AOTCharacterBase::Tick(float DeltaTime)
@@ -433,9 +456,14 @@ void AOTCharacterBase::TriggerWallDestruction(FVector_NetQuantize ImpactPoint, F
 				UGeometryCollectionComponent* GeoComp = DestructibleWall->GetGeometryCollectionComponent();
 				if (GeoComp)
 				{
+					if (DestructSound)
+					{
+						UGameplayStatics::PlaySoundAtLocation(this, DestructSound, ImpactPoint);
+					}
+
 					// ¾à°£ÀÇ µô·¹ÀÌ¸¦ µÎ°í ÆÄ±« (·»´õ¸µ º¸Àå)
 					FTimerHandle BreakTimerHandle;
-
+					
 					GetWorld()->GetTimerManager().SetTimer(BreakTimerHandle, [GeoComp, ImpactPoint, WallLocation]()
 						{
 							const float ForceMultiplier = 1000000.0f;

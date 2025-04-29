@@ -10,6 +10,7 @@
 #include "OneTwoBreakFree/Weapon/OTWeapon.h"
 #include "OneTwoBreakFree/PlayerController/OTPlayerController.h"
 #include "OneTwoBreakFree/GameState/OTMatchGameState.h"
+#include "Kismet/GameplayStatics.h"
 
 AOTKillerCharacter::AOTKillerCharacter(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer.SetDefaultSubobjectClass<UOTCharacterMovementComponent>(ACharacter::CharacterMovementComponentName))
@@ -121,6 +122,14 @@ void AOTKillerCharacter::PlayReloadMontage()
 void AOTKillerCharacter::PlaySwapMontage()
 {
 	MulticastPlaySwapMontage();
+}
+
+void AOTKillerCharacter::ClientPlayKillSound_Implementation()
+{
+	if (KillSound)
+	{
+		UGameplayStatics::PlaySound2D(this, KillSound);
+	}
 }
 
 void AOTKillerCharacter::StartFire()

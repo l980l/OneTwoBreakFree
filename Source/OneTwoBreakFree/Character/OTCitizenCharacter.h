@@ -46,6 +46,9 @@ protected:
     virtual void OnCharacterDeath(class UOTHealthComponent* HealthComp, AActor* KilledActor, AActor* KillerActor);
 
     UPROPERTY(EditDefaultsOnly, Category = "Audio")
+    TObjectPtr<USoundBase> DamagedSound;
+
+    UPROPERTY(EditDefaultsOnly, Category = "Audio")
     TObjectPtr<USoundBase> DeadSound;
 
     UPROPERTY(EditDefaultsOnly, Category = "Audio")

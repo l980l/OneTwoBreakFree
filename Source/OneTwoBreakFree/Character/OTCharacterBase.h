@@ -106,6 +106,15 @@ protected:
 
     uint8 bIsKicking : 1 = false;
 
+    UPROPERTY()
+    TObjectPtr<class UAudioComponent> BGMAudioComponent;
+
+    UPROPERTY(EditDefaultsOnly, Category = "Audio")
+    TObjectPtr<USoundBase> BGM;
+
+    UPROPERTY(EditDefaultsOnly, Category = "Audio")
+    TObjectPtr<USoundBase> DestructSound;
+
 private:
     void Move(const FInputActionValue& Value);
     void Look(const FInputActionValue& Value);

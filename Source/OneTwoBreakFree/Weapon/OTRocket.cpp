@@ -196,6 +196,11 @@ void AOTRocket::MulticastTriggerWallDestruction_Implementation(const FVector& Im
                 {
                     FVector ImpactDirection = (WallLocation - ImpactPoint).GetSafeNormal();
 
+                    if (DestructSound)
+                    {
+                        UGameplayStatics::PlaySoundAtLocation(this, DestructSound, ImpactPoint);
+                    }
+
                     // ¾à°£ÀÇ µô·¹ÀÌ ÈÄ ÆÄ±« (·»´õ¸µ º¸Àå)
                     FTimerHandle BreakTimerHandle;
                     GetWorld()->GetTimerManager().SetTimer(
