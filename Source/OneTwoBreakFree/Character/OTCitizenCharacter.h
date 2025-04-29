@@ -22,13 +22,6 @@ public:
 protected:
     virtual void BeginPlay() override;
 
-protected:
-    UFUNCTION()
-    virtual void OnHealthChanged(class UOTHealthComponent* HealthComp, float Health, float HealthDelta);
-
-    UFUNCTION()
-    virtual void OnCharacterDeath(class UOTHealthComponent* HealthComp, AActor* KilledActor, AActor* KillerActor);
-
 public:
     UFUNCTION(BlueprintCallable, Category = "Gameplay")
     virtual void HandleEscape();
@@ -44,4 +37,17 @@ public:
 
     UPROPERTY(EditAnywhere, Category = "Spectator")
     TSubclassOf<class AOTSpectatorPawn> SpectatorPawnClass;
+
+protected:
+    UFUNCTION()
+    virtual void OnHealthChanged(class UOTHealthComponent* HealthComp, float Health, float HealthDelta);
+
+    UFUNCTION()
+    virtual void OnCharacterDeath(class UOTHealthComponent* HealthComp, AActor* KilledActor, AActor* KillerActor);
+
+    UPROPERTY(EditDefaultsOnly, Category = "Audio")
+    TObjectPtr<USoundBase> DeadSound;
+
+    UPROPERTY(EditDefaultsOnly, Category = "Audio")
+    TObjectPtr<USoundBase> EscapeSound;
 };

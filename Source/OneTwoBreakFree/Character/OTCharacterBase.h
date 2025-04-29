@@ -39,6 +39,11 @@ protected:
     virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
     virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
+    UFUNCTION(BlueprintCallable, Category = "Character|Audio")
+    void PlayFootstepSound();
+
+    EPhysicalSurface GetFootstepSurfaceType();
+
     UFUNCTION(BlueprintCallable)
     void KickImpact();
 
@@ -65,6 +70,9 @@ protected:
 
     UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Kick")
     float KickRange = 150.0f;
+
+    UPROPERTY(EditDefaultsOnly, Category = "Audio")
+    TMap<TEnumAsByte<EPhysicalSurface>, TObjectPtr<USoundBase>> FootstepSounds;
 
     UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Input")
     TObjectPtr<class UInputMappingContext> DefaultMappingContext;
@@ -131,6 +139,9 @@ private:
 
     UFUNCTION()
     void OnRep_IsSprinting();
+
+    float LastFootstepTime = 0.0f;
+    float FootstepCooldown = 0.2f;
 
 public:
     FORCEINLINE EOTCharacterRole GetCharacterRole() const { return CharacterRole; }

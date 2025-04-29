@@ -16,6 +16,7 @@
 #include "Engine/StaticMeshActor.h"
 #include "GeometryCollection/GeometryCollectionComponent.h"
 #include "GeometryCollection/GeometryCollectionActor.h"
+#include "Kismet/GameplayStatics.h"
 
 
 AOTCharacterBase::AOTCharacterBase(const FObjectInitializer& ObjectInitializer)
@@ -75,6 +76,58 @@ void AOTCharacterBase::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& Out
 	DOREPLIFETIME(AOTCharacterBase, MaxStamina);
 	DOREPLIFETIME(AOTCharacterBase, Stamina);
 	DOREPLIFETIME(AOTCharacterBase, bIsSprinting);
+}
+
+void AOTCharacterBase::PlayFootstepSound()
+{
+	const float CurrentTime = GetWorld()->GetTimeSeconds();
+
+	if (CurrentTime - LastFootstepTime < FootstepCooldown)
+	{
+		return;
+	}
+
+	LastFootstepTime = CurrentTime;
+
+	const float VolumeMultiplier = bIsSprinting ? 1.f : 0.3f;
+
+	if (EPhysicalSurface SurfaceType = GetFootstepSurfaceType())
+	{
+		if (USoundBase* Sound = FootstepSounds[SurfaceType])
+		{
+			UGameplayStatics::PlaySoundAtLocation(this, Sound, GetActorLocation(), VolumeMultiplier);
+		}
+	}
+	else
+	{
+		if (USoundBase* Sound = FootstepSounds[SurfaceType_Default])
+		{
+			UGameplayStatics::PlaySoundAtLocation(this, Sound, GetActorLocation(), VolumeMultiplier);
+		}
+	}
+}
+
+EPhysicalSurface AOTCharacterBase::GetFootstepSurfaceType()
+{
+	EPhysicalSurface SurfaceType = SurfaceType_Default;
+
+	FVector Start = GetActorLocation();
+	FVector End = Start - FVector(0, 0, 200);
+
+	FHitResult HitResult;
+	FCollisionQueryParams QueryParams;
+	QueryParams.bReturnPhysicalMaterial = true;
+	QueryParams.AddIgnoredActor(this);
+
+	if (GetWorld()->LineTraceSingleByChannel(HitResult, Start, End, ECC_Visibility, QueryParams))
+	{
+		if (HitResult.PhysMaterial.IsValid())
+		{
+			SurfaceType = HitResult.PhysMaterial->SurfaceType;
+		}
+	}
+
+	return SurfaceType;
 }
 
 void AOTCharacterBase::BeginPlay()
@@ -390,17 +443,10 @@ void AOTCharacterBase::TriggerWallDestruction(FVector_NetQuantize ImpactPoint, F
 							GeoComp->AddImpulseAtLocation(ImpactDirection * ForceMultiplier, ImpactPoint);
 						}, 0.1f, false);
 
-					FTimerHandle DestroyTimerHandle;
-					FTimerDelegate DestroyDelegate;
-					DestroyDelegate.BindLambda([DestructibleWall, WallActor]()
-						{
-							if (DestructibleWall)
-							{
-								DestructibleWall->Destroy();
-							}
-						});
-
-					GetWorldTimerManager().SetTimer(DestroyTimerHandle, DestroyDelegate, 10.0f, false);
+					if (DestructibleWall)
+					{
+						DestructibleWall->SetLifeSpan(10.f);
+					}
 				}
 			}
 		}

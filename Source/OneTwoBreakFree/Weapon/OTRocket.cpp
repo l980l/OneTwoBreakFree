@@ -209,18 +209,10 @@ void AOTRocket::MulticastTriggerWallDestruction_Implementation(const FVector& Im
                         false
                     );
 
-                    // 일정 시간 후 파괴된 벽 정리
-                    FTimerHandle DestroyTimerHandle;
-                    FTimerDelegate DestroyDelegate;
-                    DestroyDelegate.BindLambda([DestructibleWall, WallActor]()
-                        {
-                            if (DestructibleWall)
-                            {
-                                DestructibleWall->Destroy();
-                            }
-                        });
-
-                    GetWorldTimerManager().SetTimer(DestroyTimerHandle, DestroyDelegate, 10.0f, false);
+                    if (DestructibleWall)
+                    {
+                        DestructibleWall->SetLifeSpan(10.f);
+                    }
                 }
             }
         }

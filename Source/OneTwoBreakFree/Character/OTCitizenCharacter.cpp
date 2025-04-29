@@ -11,7 +11,6 @@
 #include "OneTwoBreakFree/PlayerState/OTPlayerState.h"
 #include "OneTwoBreakFree/Types/AnnouncementType.h"
 #include "OneTwoBreakFree/Character/OTSpectatorPawn.h"
-#include "Kismet/GameplayStatics.h"
 
 AOTCitizenCharacter::AOTCitizenCharacter(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer.SetDefaultSubobjectClass<UOTCharacterMovementComponent>(ACharacter::CharacterMovementComponentName))
