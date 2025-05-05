@@ -218,7 +218,7 @@ void AOTRifle::PlayFireEffects()
     if (MuzzleFlash)
     {
         USkeletalMeshComponent* WeaponSkeletalMesh = Cast<USkeletalMeshComponent>(WeaponMesh);
-        if (WeaponSkeletalMesh)
+        if (WeaponSkeletalMesh && !Cast<ACharacter>(GetOwner())->IsLocallyControlled())
         {
             const FTransform MuzzleTransform = WeaponSkeletalMesh->GetSocketTransform(MuzzleSocketName);
             UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), MuzzleFlash, MuzzleTransform);

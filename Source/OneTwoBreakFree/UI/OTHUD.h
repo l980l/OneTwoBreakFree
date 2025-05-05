@@ -46,4 +46,12 @@ public:
 	TObjectPtr<class UOTGameResultsWidget> GameResultsWidget;
 
 	void AddGameResultsWidget();
+
+	UPROPERTY(EditAnywhere, Category = "Widgets")
+	TSubclassOf<class UOTSettingUI> SettingUIClass;
+
+	UPROPERTY()
+	TObjectPtr<class UOTSettingUI> SettingUI;
+
+	void ToggleSettingUI();
 };

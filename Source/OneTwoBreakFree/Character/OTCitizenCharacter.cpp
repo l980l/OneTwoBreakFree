@@ -34,13 +34,13 @@ void AOTCitizenCharacter::BeginPlay()
 
 void AOTCitizenCharacter::OnHealthChanged(UOTHealthComponent* HealthComp, float Health, float HealthDelta)
 {
+	if (DamagedSound)
+	{
+		UGameplayStatics::PlaySoundAtLocation(this, DamagedSound, GetActorLocation());
+	}
+
 	if (IsLocallyControlled())
 	{
-		if (DamagedSound)
-		{
-			UGameplayStatics::PlaySound2D(this, DamagedSound);
-		}
-
 		if (AOTPlayerController* PC = Cast<AOTPlayerController>(Controller))
 		{
 			PC->SetHUDHealth(Health / GetMaxHealth());

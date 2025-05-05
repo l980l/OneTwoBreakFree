@@ -132,22 +132,22 @@ void AOTLobbyGameMode::StartGame()
         return;
     }
 
-    UE_LOG(LogTemp, Log, TEXT("Starting game with %d players"), GetPlayerCount());
-
-    const FString URL = TEXT("/Game/Levels/") + MatchLevelName.ToString() + TEXT("?listen");
-
     for (FConstPlayerControllerIterator It = GetWorld()->GetPlayerControllerIterator(); It; ++It)
     {
         AOTLobbyPlayerController* PC = Cast<AOTLobbyPlayerController>(It->Get());
         if (PC)
         {
-            PC->SetLoadingUIVisibile();
+            PC->ClientSetLoadingUIVisible();
         }
     }
 
+    UE_LOG(LogTemp, Log, TEXT("Starting game with %d players"), GetPlayerCount());
+
+    const FString URL = TEXT("/Game/Levels/") + MatchLevelName.ToString() + TEXT("?listen");
+
     SetGameInstancePlayerCount();
 
-    bUseSeamlessTravel = true;
+    bUseSeamlessTravel = false;
     GetWorld()->ServerTravel(URL);
 }
 

@@ -192,17 +192,7 @@ void UOTLobbyUI::UpdatePlayerList(const TArray<FLobbyPlayerInfo>& PlayersInfo)
 
     for (const FLobbyPlayerInfo& PlayerInfo : PlayersInfo)
     {
-        bool bIsHost = false;
-        if (PlayerInfo.PlayerController)
-        {
-            bIsHost = bIsLocalHost && (PlayerInfo.PlayerController == PlayerController);
-        }
-
-        UUserWidget* PlayerItem = CreatePlayerListItem(
-            PlayerInfo.PlayerName,
-            PlayerInfo.bIsReadyForMatch,
-            bIsHost
-        );
+        UUserWidget* PlayerItem = CreatePlayerListItem(PlayerInfo.PlayerName, PlayerInfo.bIsReadyForMatch);
 
         if (PlayerItem)
         {
@@ -224,7 +214,7 @@ void UOTLobbyUI::SetLoadingUIVisible()
     }
 }
 
-UUserWidget* UOTLobbyUI::CreatePlayerListItem(const FString& PlayerName, bool bIsReady, bool bIsHost)
+UUserWidget * UOTLobbyUI::CreatePlayerListItem(const FString& PlayerName, bool bIsReady)
 {
     if (!PlayerListItemClass)
     {
@@ -232,12 +222,12 @@ UUserWidget* UOTLobbyUI::CreatePlayerListItem(const FString& PlayerName, bool bI
         return nullptr;
     }
 
-    if (GetOwningPlayer())
+    if (IsValid(GetOwningPlayer()))
     {
         UOTLobbyPlayerItem* PlayerItem = CreateWidget<UOTLobbyPlayerItem>(GetOwningPlayer(), PlayerListItemClass);
         if (PlayerItem)
         {
-            PlayerItem->SetPlayerInfo(PlayerName, bIsReady, bIsHost);
+            PlayerItem->SetPlayerInfo(PlayerName, bIsReady);
             return PlayerItem;
         }
     }

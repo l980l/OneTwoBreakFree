@@ -68,8 +68,7 @@ public:
 	void UpdatePlayerList(const TArray<struct FLobbyPlayerInfo>& PlayersInfo);
 	void SetLoadingUIVisible();
 
-	UFUNCTION(Category = "Lobby")
-	UUserWidget* CreatePlayerListItem(const FString& PlayerName, bool bIsReady, bool bIsHost);
+	UUserWidget * CreatePlayerListItem(const FString& PlayerName, bool bIsReady);
 
 	UPROPERTY(EditDefaultsOnly, Category = "UI")
 	TSubclassOf<UOTLobbyPlayerItem> PlayerListItemClass;

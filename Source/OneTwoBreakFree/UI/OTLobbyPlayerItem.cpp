@@ -5,7 +5,7 @@
 #include "Components/TextBlock.h"
 #include "Components/Image.h"
 
-void UOTLobbyPlayerItem::SetPlayerInfo(const FString& InPlayerName, bool bInIsReady, bool bInIsHost)
+void UOTLobbyPlayerItem::SetPlayerInfo(const FString& InPlayerName, bool bInIsReady)
 {
     if (PlayerNameText)
     {

@@ -100,6 +100,11 @@ void AOTSpectatorPawn::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 		{
 			EnhancedInputComponent->BindAction(ToggleFreeCamAction, ETriggerEvent::Started, this, &AOTSpectatorPawn::ToggleFreeCamera);
 		}
+
+		if (ToggleFreeCamAction)
+		{
+			EnhancedInputComponent->BindAction(OptionAction, ETriggerEvent::Started, this, &AOTSpectatorPawn::OptionPressed);
+		}
 	}
 
 	if (APlayerController* PC = Cast<APlayerController>(GetController()))
@@ -141,6 +146,14 @@ void AOTSpectatorPawn::PreviousTarget(const FInputActionValue& Value)
 void AOTSpectatorPawn::ToggleFreeCamera(const FInputActionValue& Value)
 {
 	ToggleFreeCameraMode();
+}
+
+void AOTSpectatorPawn::OptionPressed(const FInputActionValue& Value)
+{
+	if (AOTPlayerController* PC = Cast<AOTPlayerController>(Controller))
+	{
+		PC->ToggleSettingUI();
+	}
 }
 
 void AOTSpectatorPawn::EnableTargetSwitch()

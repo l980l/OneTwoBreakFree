@@ -7,6 +7,7 @@
 #include "OTAnnouncementWidget.h"
 #include "OTSpectatorUI.h"
 #include "OTGameResultsWidget.h"
+#include "OTSettingUI.h"
 
 void AOTHUD::AddCharacterOverlay()
 {
@@ -45,5 +46,30 @@ void AOTHUD::AddGameResultsWidget()
 	{
 		GameResultsWidget = CreateWidget<UOTGameResultsWidget>(PlayerController, GameResultsWidgetClass);
 		GameResultsWidget->AddToViewport();
+	}
+}
+
+void AOTHUD::ToggleSettingUI()
+{
+	APlayerController* PlayerController = GetOwningPlayerController();
+	if (PlayerController && SettingUIClass)
+	{
+		if (SettingUI)
+		{
+			SettingUI->RemoveFromParent();
+
+			PlayerController->SetInputMode(FInputModeGameOnly());
+			PlayerController->bShowMouseCursor = false;
+
+			SettingUI = nullptr;
+		}
+		else
+		{
+			SettingUI = CreateWidget<UOTSettingUI>(PlayerController, SettingUIClass);
+			SettingUI->AddToViewport();
+
+			PlayerController->SetInputMode(FInputModeGameAndUI());
+			PlayerController->bShowMouseCursor = true;
+		}
 	}
 }

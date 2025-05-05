@@ -40,6 +40,9 @@ protected:
 	TObjectPtr<class UInputAction> ToggleFreeCamAction;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Input")
+	TObjectPtr<class UInputAction> OptionAction;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Input")
 	TObjectPtr<class UInputMappingContext> SpectatorMappingContext;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Spectator")
@@ -55,6 +58,7 @@ protected:
 	void NextTarget(const FInputActionValue& Value);
 	void PreviousTarget(const FInputActionValue& Value);
 	void ToggleFreeCamera(const FInputActionValue& Value);
+	void OptionPressed(const FInputActionValue& Value);
 
 	void UpdateAvailableTargets();
 

@@ -92,7 +92,7 @@ void AOTCharacterBase::PlayFootstepSound()
 
 	LastFootstepTime = CurrentTime;
 
-	const float VolumeMultiplier = bIsSprinting ? 1.f : 0.3f;
+	const float VolumeMultiplier = bIsSprinting ? 1.f : 0.5f;
 
 	if (EPhysicalSurface SurfaceType = GetFootstepSurfaceType())
 	{
@@ -226,6 +226,7 @@ void AOTCharacterBase::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 		EnhancedInputComponent->BindAction(SprintAction, ETriggerEvent::Started, this, &AOTCharacterBase::SprintPressed);
 		EnhancedInputComponent->BindAction(SprintAction, ETriggerEvent::Completed, this, &AOTCharacterBase::SprintReleased);
 		EnhancedInputComponent->BindAction(KickAction, ETriggerEvent::Started, this, &AOTCharacterBase::KickPressed);
+		EnhancedInputComponent->BindAction(OptionAction, ETriggerEvent::Started, this, &AOTCharacterBase::OptionPressed);
 	}
 
 	if (APlayerController* PC = Cast<APlayerController>(GetController()))
@@ -292,6 +293,14 @@ void AOTCharacterBase::KickPressed(const FInputActionValue& Value)
 	if (bIsSprinting)
 	{
 		ServerToggleSprint(false);
+	}
+}
+
+void AOTCharacterBase::OptionPressed(const FInputActionValue& Value)
+{
+	if (AOTPlayerController* PC = Cast<AOTPlayerController>(Controller))
+	{
+		PC->ToggleSettingUI();
 	}
 }
 

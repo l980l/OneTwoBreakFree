@@ -89,6 +89,9 @@ protected:
     UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Input")
     TObjectPtr<class UInputAction> KickAction;
 
+    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Input")
+    TObjectPtr<class UInputAction> OptionAction;
+
     UPROPERTY(EditDefaultsOnly, Category = "Animation")
     TObjectPtr<class UAnimMontage> ThirdPersonKickMontage;
 
@@ -121,6 +124,7 @@ private:
     void SprintPressed(const FInputActionValue& Value);
     void SprintReleased(const FInputActionValue& Value);
     void KickPressed(const FInputActionValue& Value);
+    void OptionPressed(const FInputActionValue& Value);
 
     void ConsumeStamina(float DeltaTime);
     void RegenerateStamina(float DeltaTime);

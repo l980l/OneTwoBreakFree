@@ -40,6 +40,9 @@ public:
     UFUNCTION(BlueprintCallable, Category = "Player")
     void SetPlayerNewName(const FString& NewName);
 
+    UFUNCTION(Client, Reliable)
+    void ClientSetLoadingUIVisible();
+
     UFUNCTION()
     void SetLoadingUIVisibile();
 

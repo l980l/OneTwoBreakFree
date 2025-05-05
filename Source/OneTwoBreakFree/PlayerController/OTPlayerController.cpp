@@ -177,6 +177,16 @@ void AOTPlayerController::ShowAnnouncement(EAnnouncementType Type, float ShowTim
     }
 }
 
+void AOTPlayerController::ToggleSettingUI()
+{
+    if (!OTHUD)
+        OTHUD = Cast<AOTHUD>(GetHUD());
+    if (OTHUD)
+    {
+        OTHUD->ToggleSettingUI();
+    }
+}
+
 void AOTPlayerController::ClientSetSpectatorUI_Implementation()
 {
     if (OTHUD)

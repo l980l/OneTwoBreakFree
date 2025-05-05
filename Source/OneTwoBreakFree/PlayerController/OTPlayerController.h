@@ -42,6 +42,7 @@ public:
     void FlashHitMarker();
     void HideLoadingUI();
     void ShowAnnouncement(EAnnouncementType Type, float ShowTime = 3.f);
+    void ToggleSettingUI();
 
     UFUNCTION(Client, Reliable)
     void ClientSetSpectatorUI();

@@ -15,8 +15,7 @@ class ONETWOBREAKFREE_API UOTLobbyPlayerItem : public UUserWidget
 	GENERATED_BODY()
 	
 public:
-    UFUNCTION(BlueprintCallable, Category = "Lobby")
-    void SetPlayerInfo(const FString& InPlayerName, bool bInIsReady, bool bInIsHost);
+    void SetPlayerInfo(const FString& InPlayerName, bool bInIsReady);
 
     UPROPERTY(meta = (BindWidget), BlueprintReadOnly)
     class UTextBlock* PlayerNameText;

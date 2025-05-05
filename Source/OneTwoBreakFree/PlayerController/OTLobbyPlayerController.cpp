@@ -121,6 +121,11 @@ void AOTLobbyPlayerController::SetPlayerNewName(const FString& NewName)
     ServerSetPlayerName(NewName);
 }
 
+void AOTLobbyPlayerController::ClientSetLoadingUIVisible_Implementation()
+{
+    SetLoadingUIVisibile();
+}
+
 void AOTLobbyPlayerController::SetLoadingUIVisibile()
 {
     if (!OTLobbyHUD)

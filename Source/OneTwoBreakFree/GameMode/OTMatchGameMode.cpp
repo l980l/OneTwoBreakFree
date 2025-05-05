@@ -542,8 +542,8 @@ void AOTMatchGameMode::ReturnToLobby()
     UWorld* World = GetWorld();
     if (World)
     {
-        bUseSeamlessTravel = true;
         const FString URL = TEXT("/Game/Levels/") + LobbyLevelName.ToString() + TEXT("?listen");
+        bUseSeamlessTravel = false;
         World->ServerTravel(URL);
     }
 }
