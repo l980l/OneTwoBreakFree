@@ -57,11 +57,10 @@ void AOTHUD::ToggleSettingUI()
 		if (SettingUI)
 		{
 			SettingUI->RemoveFromParent();
+			SettingUI = nullptr;
 
 			PlayerController->SetInputMode(FInputModeGameOnly());
 			PlayerController->bShowMouseCursor = false;
-
-			SettingUI = nullptr;
 		}
 		else
 		{

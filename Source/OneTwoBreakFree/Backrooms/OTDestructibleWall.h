@@ -20,5 +20,5 @@ public:
 
 private:
 	float Impulse;
-	FVector ImpactPoint
+	FVector ImpactPoint;
 };
